@@ -1,0 +1,128 @@
+# Bayes Rule {#sec-bayesrule}
+
+{{< include _setupcode.qmd >}}
+
+In a probability course, Bayes' Rule is often presented as a neat trick for solving a particular type of problem involving two events. While this simple class of problems understates its true potential, it does serve as a way of highlighting the key idea behind the method.
+
+:::{#exm-disease}
+## Disease Testing
+An enzyme-linked immunosorbent assay (ELISA) test is performed to determine if the human immunodeficiency virus (HIV) is present in the blood of individuals. Suppose that the ELISA test correctly indicates HIV 99% of the time, and it correctly indicates being HIV-free in 99.5% of cases. Finally, suppose that the prevalence of HIV among blood donors is known to be 1/10000. What is the probability an individual who testes positive is actually infected with HIV?
+:::
+
+In this example, we are interested in the probability of an individual being infected with HIV _given_ their test is positive.  Recalling the definition of conditional probability (@thm-conditional-probability), we consider
+
+$$Pr(\text{Infected with HIV} \mid \text{Tests Positive}) = \frac{Pr(\text{Infected with HIV} \cap \text{Tests Positive})}{Pr(\text{Tests Positive})};$$
+
+however, these probabilities are not provided in the problem.  What we actually have are the probability of testing positive given the patient is infected with HIV (0.99), the probability of testing negative given the patient is not infected with HIV (0.95), and the probability of having HIV (1/10000).  This is the power of Bayes' Rule --- it allows you to address problems by reversing the conditioning.  That is, we can make a statement about the likelihood of $A$ given $B$ using information about the likelihood of $B$ given $A$!  As we state Bayes Rule, we keep in mind that it is not the rule itself which is innovative but (a) what the rule implies and (b) how we apply it to solve problems in statistical inference, that make it valuable.
+
+:::{#thm-simple-bayes-rule}
+## Bayes Theorem for Two Events
+Given events $A$ and $B$ such that $Pr(A), Pr(B) \neq 0$, then we have that
+
+$$Pr(A \mid B) = \frac{Pr(B \mid A)Pr(A)}{Pr(B \mid A)Pr(A) + Pr(B \mid A^\mathsf{c}) Pr(A^\mathsf{c})}$$
+:::
+
+Bayes' Rule is actually a convenient wrapper for an application of several other basic probability results combined:
+
+  - The numerator is an application of the definition of conditional probability; we can always write a joint probability ("and statement") as the product of a conditional probability and a marginal probability.
+  - The denominator is the result of the total probability rule; a marginal probability is computed by summing over mutually exclusive joint probabilities, which again are rewritten similarly to the numerator.
+
+:::{.callout-tip}
+## Big Idea
+Bayes' Rule says that our information about $A$, _after_ observing $B$, can be stated in terms of what we know about $B$ after observing $A$ and our belief about $A$ _prior_ to seeing $B$.
+:::
+
+The above is useful when talking about two events, but the majority of applications address random variables, not specific events. That is, we are interested in characterizing entire distributions, not just probabilities for specific events.  Following the same logic as above, we are able to extend (from a total probability rule and from the definition of conditional probability) the above result to two random variables.
+
+:::{#thm-rv-bayes-rule}
+## Bayes Theorem for Two Random Variables
+Let $X$ and $Y$ be two random variables; then, we have that
+
+$$f_{Y \mid X}(y \mid x) = \frac{f_{X \mid Y}(x \mid y) f_Y(y)}{\int_{\mathcal{S}_Y} f_{X \mid Y}(x \mid y) f_Y(y) dy},$$
+
+where the integration is replaced by summation when necessary to account for a discrete random variable.
+:::
+
+:::{.callout-note}
+We will not distinguish between continuous and discrete random variables.  For compactness, all results are presented assuming continuous random variables.  When necessary, replace integration with summation (as summation is really just integration with respect to a specific measure).
+:::
+
+As stated above, this result is really the application of basic definitions covered in a probability course.  But, they are worth revisiting.  
+
+:::{#def-conditional-density}
+## Conditional Density
+Let $X$ and $Y$ be two random variables; the conditional density of $X$ given $Y$ is 
+
+$$f_{X \mid Y}(y \mid x) = \frac{f_{X, Y}(x, y)}{f_Y(y)}$$
+:::
+
+
+:::{.callout-note}
+Subscripts are to denote which random variable is being discussed; so, $f_X(x)$ refers to the density function of the random variable $X$ evaluated at $x$.  We suppress the subscripts when the context makes it clear which random variable is being referenced.
+:::
+
+Rearranging the terms in @def-conditional-density, we are able to see that any joint density function $f_{X, Y}(x, y)$ can be written as the product of a conditional density and a marginal density.  Similarly, we can write any marginal density by integrating over a joint density.
+
+:::{#thm-total-probability-rule}
+## Total Probability Rule for Random Variables
+Let $X$ and $Y$ be two random variables with joint density $f_{X,Y}(x,y)$; then, the marginal density of $X$ is given by
+
+$$f_X(x) = \int_{\mathcal{S}_Y} f_{X,Y}(x, y) dy,$$
+
+where $\mathcal{S}_Y$ is the support of $Y$.
+:::
+
+To add a little more intuition to this result, let $X$ represent the grade in this course, and suppose we are interested in the event that $X$ takes the value "A."  Well, this course is most certainly impacted by your other courses; so, let $Y$ take the value of the grade in the hardest class remaining on your schedule.  Then, there are only a certain number of options:
+
+  - $X$ takes the value "A" while $Y$ takes the value "A" (whoo hoo!);
+  - $X$ takes the value "A" while $Y$ takes the value "B";
+  - $X$ takes the value "A" while $Y$ takes the value "C";
+  - $X$ takes the value "A" while $Y$ takes the value "D"; and,
+  - $X$ takes the value "A" while $Y$ takes the value "F" (let's hope not).
+
+Each of these has some probability of occurring.  Since this exhausts all possibilities for $Y$, then we can determine the probability of $X$ by summing the probability of each of these mutually exclusive events.  The above lemma captures that we can do this for all values in the support of $X$ simultaneously.  Essentially, we have a partition across the support of $X$ based on the value of $Y$; then, we compute the probability of $X$ by summing over the partition.
+
+The above definition is sufficient for several applications. However, it is worth stating the theorem from the most general of perspectives.  To do so, we need to define the concept of a random vector.
+
+
+:::{#def-random-vector}
+## Random Vector
+Let $X_1, X_2, \dots, X_n$ be $n$ random variables.  Then, the vector $\bm{X} = \left(X_1, X_2, \dots, X_n\right)^\top$ is a random vector of length $n$.
+:::
+
+A random vector is essentially a vector comprised of random components.  This will be necessary moving forward because we typically have samples of size $n > 1$.
+
+:::{#thm-bayes-rule}
+## Bayes Theorem
+Let $\bm{X}$ and $\bm{Y}$ be two random _vectors_.  Then, we have that
+
+$$f_{\bm{Y} \mid \bm{X}}(\bm{y} \mid \bm{x}) = \frac{f_{\bm{X} \mid \bm{Y}}(\bm{x} \mid \bm{y}) f_{\bm{Y}}(\bm{y})}{\int_{\mathcal{S}_\bm{Y}} f_{\bm{X} \mid \bm{Y}}(\bm{x} \mid \bm{y}) f_{\bm{Y}}(\bm{y}) d\bm{y}}$$
+
+where the integral is now a multi-dimensional integral.  Integration for any component is replaced by summation when needed.
+:::
+
+
+## Tenants of the Bayesian Approach to Inference
+The above results on their own may be interesting in a probability course.  However, we are interested primarily in their application when we have observed a sample from a population which is not fully known.  Before we delve into the mechanics, let's pause to reflect on how we intend to apply these results.
+
+Recall that statistics is about using a sample to make inference on the population.  Specifically, we will posit a model for the distribution of a response within the population; however, that model will be specified only up to some unknown parameters.  There are two general statistical paradigms for performing inference, and these stem from two different questions we might ask:
+
+- Given a hypothesis about the parameters is true, how likely is the observed data?
+- Given the observed data, how likely is a particular hypothesis about the parameters?
+
+The first question results in the classical Frequentist perspective (most statistical courses) and a frequentist interpretation of probability.  The second results in the Bayesian perspective and a subjective interpretation of probability.
+
+Prior to collecting data, we might have some belief about the the unknown parameters that govern our model for the population.  Then, we collect a sample from the population; since this data is representative of the population, it must contain information about those parameters.  Therefore, we want to update our belief about the parameters in light of this data.  That is the Bayesian process in a nutshell.
+
+:::{.callout-important}
+## Tenants of the Bayesian Approach to Inference
+Every analysis in this course is built on the following three tenants:
+
+  1. The Bayesian approach takes into account _prior_ knowledge when making inference.
+  2. The Bayesian approach uses probability models to _quantify uncertainty_ in the parameters.
+  3. The Bayesian approach _updates_ our prior knowledge conditional on the observed data.
+:::
+
+Throughout, we will rely on a subjective view of probability. That is, probability characterizes how sure you are of something. So, it does not make sense to say "how likely is it to rain tomorrow?"  There is no one probability that answers this question.  Instead, we will always have (even if not explicitly stated) a "how likely _do you believe_...'' element to our question. That is, we are always bringing in our personal (subjective) opinion. This can be very uncomfortable for some of us --- the idea of there not being a single "right" answer.  We will save this discussion for a future chapter.
+
+

@@ -1,0 +1,20 @@
+{
+  "hash": "871d55a3317ebb08b26e7d8b3b232ece",
+  "result": {
+    "markdown": "# Preface {.unnumbered}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\\providecommand{\\norm}[1]{\\lVert#1\\rVert}\n\\providecommand{\\abs}[1]{\\lvert#1\\rvert}\n\\providecommand{\\iid}{\\stackrel{\\text{IID}}{\\sim}}\n\\providecommand{\\ind}{\\stackrel{\\text{Ind}}{\\sim}}\n  \n\\providecommand{\\bm}[1]{\\mathbf{#1}}\n\\providecommand{\\bs}[1]{\\boldsymbol{#1}}\n\\providecommand{\\bbeta}{\\bs{\\beta}}\n  \n\\providecommand{\\Ell}{\\mathcal{L}}\n\\providecommand{\\indep}{\\perp\\negthickspace\\negmedspace\\perp}\n\n\n\nData is all around us.  And, that data will be subject to variability; that is, measured characteristics will vary from one observation to the next.  Learning to characterize that variability and make decisions in its presence is the idea behind statistics.  The text emphasizes statistical literacy (interpretation and clear communication of statistical concepts, methods, and results) and statistical reasoning (defining the need for data to address questions, modeling variability in a process, and choosing the appropriate methodology to address a question of interest).  \n\nSpecifically, this text introduces the Bayesian framework for statistical inference.  Building from Bayes' Rule for probability computations, we develop a framework of estimation and hypothesis testing.  We examine inference in several scenarios, including regression analysis.  The heart of Bayesian inference is quantifying our beliefs about the data generating process prior to collecting data, and then using the observed data to update those beliefs.  We discuss the construction of prior distributions given prior information about a parameter and give an introduction to computational tools for Bayesian inference, including Markov Chain Monte Carlo (MCMC) methods. \n\nWhile we do work through derivations when introducing the fundamental elements of Bayesian inference, the text is applied.  We therefore move quickly to computational approaches for the Bayesian approach.  We focus on choosing an appropriate modeling strategy and interpreting the results of an analysis.  Our aim is to provide a strong foundation in statistical ideas enabling readers to engage with research encountered in their field.\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {
+      "knitr": [
+        "{\"type\":\"list\",\"attributes\":{},\"value\":[]}"
+      ]
+    },
+    "preserve": null,
+    "postProcess": false
+  }
+}

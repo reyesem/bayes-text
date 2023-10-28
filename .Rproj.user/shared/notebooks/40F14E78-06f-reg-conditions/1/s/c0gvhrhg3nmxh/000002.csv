@@ -1,0 +1,18 @@
+"0","
+
+
+data {
+  int<lower = 0> N;
+  real<lower = 0> times[N];
+  real<lower = 0> age[N];
+}
+parameters {
+  real<lower = 0, upper = 25> beta0;
+  real<lower = 0, upper = 5> beta1;
+}
+model {
+  for (i in 1:N) {
+    target += -log(beta0 + beta1*age[i]) - (times[i] / (beta0 + beta1*age[i]));
+  }
+}
+"

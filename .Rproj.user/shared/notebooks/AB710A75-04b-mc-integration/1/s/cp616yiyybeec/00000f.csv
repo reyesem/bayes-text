@@ -1,0 +1,7 @@
+"0","#| label: mc-integration"
+"0","#| echo: false"
+"0",""
+"0","y <- x / (1 - x)"
+"0",""
+"0","ybar <- mean(y)"
+"0","MCerrory <- sqrt(sd(y) / m)"

@@ -1,0 +1,8 @@
+"0","#| label: fig-basics-statistical-process"
+"0","#| fig-cap: Illustration of the statistical process, using a sample to characterize some aspect of the underlying population."
+"0","#| fig-alt: Illustration of the statistical process, in which a sample of units is taken from the population, represented by a blue blob, and enters the sample, represented by a green blob."
+"0",""
+"0","knitr::include_graphics(""/images/Basics-Stat-Process.jpg"")"
+"2","Error in knitr::include_graphics(""/images/Basics-Stat-Process.jpg"") : 
+  Cannot find the file(s): ""/images/Basics-Stat-Process.jpg""
+"

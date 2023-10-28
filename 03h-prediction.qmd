@@ -1,0 +1,158 @@
+# Prediction {#sec-prediction}
+
+{{< include _setupcode.qmd >}}
+
+Previous chapters have focused on making a statement about the parameter given the data. However, researchers are often interested in using the data to predict what might occur in the future.  Hopefully, by now you realize that within the Bayesian framework, we are never interested _solely_ in a point estimate.  So, when we say we are interested in "prediction," we mean we are interested in characterizing our uncertainty in a future value given the data we have observed.  As this statement is not directly about the parameter, the posterior distribution does __not__ contain the relevant information; but, it can be used to derive the distribution that is relevant.  
+
+Imagine we have not yet collected data.  Given only our prior beliefs, how might we characterize a future observation (one not yet observed)?  We may not know what value a future observation will take, but we have some sense of the process that will generate it if we have posited a likelihood to describe the data generating process.  
+
+In probability, we routinely use the distribution to characterize future values each time we answered a question like "what is the probability we will observe a value between $a$ and $b$?"  It is therefore intuitive that we might turn toward the likelihood $f(\bm{y} \mid \theta)$ to describe the variability in data that has not yet been observed.  Of course, this highlights the difference between probability and statistics --- in probability, we always knew the value of $\theta$, but in statistics, we do not.  Without a value of $\theta$ to plug into the density, we are unable to use it to compute probabilities about future observations (or, more precisely, any probabilities we computed would be a function of the unknown parameter).
+
+This is where our prior beliefs come into play.  While we do not know the value of $\theta$, we do have some prior beliefs about it, and these are captured in the prior distribution.  The Bayesian framework proposes marginalizing out the parameter --- essentially taking a weighted average over all possible values it could be.  What results is not a single value, but a distribution of values known as the prior predictive distribution.
+
+:::{#def-prior-predictive-distribution}
+## Prior Predictive Distribution
+The prior predictive distribution is the marginal distribution of the response(s) prior to observing any data:
+
+$$m(\bm{y}) = \int f(\bm{y} \mid \theta) \pi(\theta) d\theta.$$
+
+The distribution marginalizes the parameter out of the likelihood using the beliefs from the prior distribution.
+:::
+
+:::{.callout-note}
+The prior predictive distribution is the denominator in Bayes Theorem.
+:::
+
+While rarely used directly, the prior predictive distribution provides a way of characterizing our uncertainty in future observations based solely on our beliefs about $\theta$ prior to observing any data.
+
+:::{.callout-tip}
+## Big Idea
+We can describe our beliefs about future values of the response by marginalizing the parameter out of the likelihood.
+:::
+
+
+Of course, we will eventually collect data, and we would like to take this knowledge into account.  After observing the data, the parameter remains unknown; however, our beliefs about the parameter are updated (and are captured in the posterior distribution).  We want to marginalize the parameter out of the likelihood while accounting for these updated beliefs.
+
+We consider swapping out the role of the prior distribution in @def-prior-predictive-distribution with the posterior distribution.  The result is the posterior predictive distribution.
+
+:::{#def-posterior-predictive-distribution}
+## Posterior Predictive Distribution
+Let $\bm{Y}^*$ represent a collection of $m$ _future_ observations.  The distribution of these future observations given the observed data $\bm{Y}$ (of length $n$), called the posterior predictive distribution, is given by
+
+$$\pi\left(\bm{y}^* \mid \bm{y}\right) = \int f\left(\bm{y}^* \mid \theta\right) \pi(\theta \mid \bm{y}) d\theta.$$
+:::
+
+While this definition is correct, its derivation requires some additional constraints on the data generating process.  We present the derivation below primarily to combat any misconceptions about what is happening in the integration above.
+
+
+## Derivation of the Posterior Predictive
+Let $\bm{Y}^*$ denote a collection of $m$ future (or new) observations not yet observed.  This is distinguished from the collection of $n$ observations we have already made $\bm{Y}$.  We impose the following two conditions/assumptions on the data generating process:
+
+  - Given the value of the parameter, the likelihood of $\bm{Y}^*$ has the same form as the likelihood of of the observed data $\bm{Y}$.
+  - Given the value of the parameter, the observed data $\bm{Y}$ is _independent_ of the new observations $\bm{Y}^*$.
+
+The first condition essentially states the data generated under one process should only be used to predict data generated from the same process.  Intuitively, when we collect data, it can only inform us about the process from which it was generated.  Therefore, our future observations are always related in some way to the likelihood, as that models the data generating process of interest.
+
+The second condition extends the concept of independence presented in a typical probability course.  This is _conditional independence_.
+
+:::{#def-conditional-independence}
+## Conditional Independence
+Two random variables $X$ and $Y$ are said to be independent, conditional on (or "given") $Z$ if, and only if,
+
+$$f_{(X,Y) \mid Z} (x, y \mid z) = f_{X \mid Z}(x \mid z) f_{Y \mid Z}(y \mid z).$$
+:::
+
+Conditional independence is common in statistical theory.  Two random quantities are somehow related, but given an additional piece of information become independent.  That is, all the information about the relationship between $X$ and $Y$ is contained in the random variable $Z$.  
+
+Returning to the stated condition, we are saying that the only thing the new and old observations have in common is the data generating process; once we know the quantities that govern this process (the parameters), then we can gain no further knowledge about the new observations from the old observations.  That is, if someone told you what the parameters were, there would be no need to collect data --- you would know everything possible for predicting a future observation.  So, the data observed is only useful in that it informs our beliefs about the unknown parameters.
+
+:::{.callout-tip}
+## Big Idea
+The data observed informs our beliefs about the parameters in the data generating process.  It is only through what the data tells us about the parameters that the data is useful in predicting a future observation.
+:::
+
+We are now prepared to derive the posterior predictive distribution.  Recall that a marginal distribution can be constructed by integrating over the other elements of a joint distribution.  For example,
+
+$$f\left(\bm{y}^*\right) = \int f\left(\bm{y}^*, \theta\right) d\theta.$$
+
+Here, we have considered the joint distribution of the new data $\bm{Y}^*$ and the parameter $\theta$, then integrated over $\theta$.  This strategy works even when we are carrying a conditional term through.  That is, we have that
+
+$$\pi\left(\bm{y}^* \mid \bm{y}\right) = \int f\left(\bm{y}^*, \theta \mid \bm{y}\right) d\theta.$$ {#eq-post-pred-step1}
+
+Here, we have considered the joint distribution of the new data $\bm{Y}^*$ and the parameter $\theta$ (conditional on the observed data), then integrated over $\theta$.  This statement would have been true for any choice of random variable, but using the parameter allows us to make use of the information we have collected through the observed data.
+
+We now recall that any joint distribution can be written as the product of a conditional distribution and a marginal distribution; this is true even if we are already conditioning on another random variable.  This gives
+
+$$f(\bm{y}^*, \theta \mid \bm{y}) = f(\bm{y}^* \mid \bm{y}, \theta) \pi(\theta \mid \bm{y}).$$ {#eq-post-pred-step2}
+
+Substituting @eq-post-pred-step2 into @eq-post-pred-step1, we now have that the posterior predictive distribution is given by
+
+$$\pi\left(\bm{y}^* \mid \bm{y}\right) = \int f(\bm{y}^* \mid \bm{y}, \theta) \pi(\theta \mid \bm{y}) d\theta.$$ {#eq-post-pred-step3}
+
+We now make use of conditional independence.  We now consider the term $f(\bm{y}^* \mid \bm{y}, \theta)$ inside the integral.  By the definition of a conditional density, we have
+
+$$f(\bm{y}^* \mid \bm{y}, \theta) = \frac{f(\bm{y}^*, \bm{y} \mid \theta)}{f(\bm{y} \mid \theta)}.$$
+
+However, if we are willing to assume that $\bm{Y}^*$ is independent of $\bm{Y}$ given $\theta$, then the numerator becomes the product of $f(\bm{y}^* \mid \theta)$ and $f(\bm{y} \mid \theta)$, meaning we have that $f(\bm{y}^* \mid \bm{y}, \theta) = f(\bm{y}^* \mid \theta)$ under conditional independence.  Substituting in this expression into @eq-post-pred-step3 gives the posterior predictive distribution in @def-posterior-predictive-distribution.
+
+
+## Summary
+Once you have the posterior predictive distribution, you have everything there is to know about future observations given the data observed.  Further, the posterior predictive distribution can be summarized just like any other distribution.  Summarizing the location (mean, median, mode) would result in point estimates for future observations.  Alternatively, we can construct interval estimates by defining a range for which the future observations would fall with some known probability.
+
+:::{.callout-warning}
+Keep in mind that we have switched our focus. We are now focused on a possible data point, not a parameter. Therefore, the support of the posterior predictive need not be the same as the support of the posterior distribution.
+:::
+
+:::{#exm-csec-prediction}
+## C-section Deliveries Continued
+@exm-csec introduced a study, a component of which includes estimating the probability of a mother undergoing a C-section delivery at a particular hospital.  
+
+@exm-csec-posterior found the posterior distribution to be
+
+$$\theta \mid \bm{x} \sim Beta\left(n + a, n\bar{x} + b\right)$$
+
+where $a = 17, b = 39, n = 15$ and $n\bar{x} = 33$ given the observed data.  Suppose we are interested in adding a 16-th patient to our survey; predict the number of vaginal deliveries we should expect before we observe a C-section.
+:::
+
+:::{.solution}
+We are interested in predicting a new _response_ given the observed data.  Following the discussion in the derivation of the posterior predictive distribution, it makes sense that we would assume the density of this new response follows the same distribution as the observed data.  In particular, if $Y$ represents the future observation, then 
+
+$$f(y \mid \theta) = \theta (1 - \theta)^y$$
+
+since each observed value (previously denoted by $X_i$) was modeled as a random variate from a Geometric distribution.  Applying @def-posterior-predictive-distribution, we have that the posterior predictive distribution is given by
+
+$$
+\begin{aligned}
+  \pi(y \mid \bm{x})
+    &= \int f\left(y \mid \theta\right) \pi(\theta \mid \bm{x}) d\theta \\
+    &= \int \theta (1 - \theta)^y \frac{\Gamma(n + a + n\bar{x} + b)}{\Gamma(n + a) \Gamma(n\bar{x} + b)} \theta^{n + a - 1} (1 - \theta)^{n\bar{x} + b - 1} d\theta \\
+    &= \frac{\Gamma(n + a + n\bar{x} + b)}{\Gamma(n + a) \Gamma(n\bar{x} + b)} \int \theta^{n + a + 1 - 1} (1 - \theta)^{n\bar{x} + b + y - 1} d\theta. 
+\end{aligned}
+$$
+
+Notice that the integrand is the kernel of a Beta distribution; therefore, we can multiply and divide by the appropriate scaling terms.  This gives 
+
+$$
+\begin{aligned}
+  \pi(y \mid \bm{x})
+    &= \frac{\Gamma(n + a + n\bar{x} + b)}{\Gamma(n + a) \Gamma(n\bar{x} + b)} \int \theta^{n + a + 1 - 1} (1 - \theta)^{n\bar{x} + b + y - 1} d\theta \\
+    &= \frac{\Gamma(n + a + n\bar{x} + b)}{\Gamma(n + a) \Gamma(n\bar{x} + b)} \frac{\Gamma(n + a + 1) \Gamma(n\bar{x} + b + y)}{\Gamma(n + a + n\bar{x} + b + 1 + y)} \\
+    &\qquad \cdot \int \frac{\Gamma(n + a + n\bar{x} + b + 1 + y)}{\Gamma(n + a + 1) \Gamma(n\bar{x} + b + y)} \theta^{n + a + 1 - 1} (1 - \theta)^{n\bar{x} + b + y - 1} d\theta \\
+    &= \frac{\Gamma(n + a + n\bar{x} + b)}{\Gamma(n + a) \Gamma(n\bar{x} + b)} \frac{\Gamma(n + a + 1) \Gamma(n\bar{x} + b + y)}{\Gamma(n + a + n\bar{x} + b + 1 + y)}.
+\end{aligned}
+$$
+
+We are not meant to recognize this distribution.  However, we can work with it.  We must keep in mind the warning, however, given just prior to this example --- the support of this distribution is non-negative integers, not the interval $(0, 1)$.  
+
+Again, prediction is not about saying how many vaginal births we _will_ see before the next C-section; it is really about quantifying our uncertainty in the various possibilities.  For example, given the data observed, we are 30.8% sure that the very next birth will be a C-section, since
+
+$$Pr(Y = 1 \mid \bm{x}) = \frac{\Gamma(32 + 72)}{\Gamma(32) \Gamma(72)} \frac{\Gamma(32 + 1) \Gamma(72 + 0)}{\Gamma(32 + 72 + 1 + 0)} = 0.308.$$
+
+Similarly, we are 88.3% sure that we will not experience more than 5 vaginal births before the next C-section, since
+
+$$Pr(Y \leq 5 \mid \bm{x}) \sum_{u=0}^{5} Pr(Y = u \mid \bm{x}) = 1 - \sum_{u=0}^{5} \frac{\Gamma(32 + 72)}{\Gamma(32) \Gamma(72)} \frac{\Gamma(32 + 1) \Gamma(72 + u)}{\Gamma(32 + 72 + 1 + u)} = 0.883.$$
+
+However, if we would like to provide a single point estimate instead of probabilities of specific responses, we might report that, given the data, _on average_, we expect to see 2.32 vaginal deliveries before the next C-section since
+
+$$E\left(Y \mid \bm{x}\right) = \sum_{u=0}^{\infty} u Pr(Y = u \mid \bm{x}) = 2.32.$$
+:::

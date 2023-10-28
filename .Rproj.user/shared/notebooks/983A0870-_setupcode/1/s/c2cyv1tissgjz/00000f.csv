@@ -1,0 +1,6 @@
+"0","#| include: false"
+"0",""
+"0","# ---- Example Data: C-sections"
+"0","csecdf <- tibble("
+"0","  Deliveries = c(3, 1, 0, 0, 0, 2, 5, 6, 9, 0, 5, 1, 0, 1, 0)"
+"0",")"

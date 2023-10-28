@@ -1,0 +1,82 @@
+project:
+  type: book
+  output-dir: 'docs'
+
+book:
+  title: 'Bayesian Data Analysis'
+  output-file: 'ma483-text'
+  author: 'Eric M Reyes'
+  
+  downloads: [pdf]
+  reader-mode: true
+  search: true
+  
+  sidebar: 
+    style: docked
+    title: 'Bayesian Data Analysis'
+    
+  
+  date: last-modified
+  date-format: '[Updated: ] DD MMMM YYYY'
+  
+  chapters:
+    - index.qmd
+    - part: 01a-probability.qmd
+      chapters: 
+        - 01b-fundamentals.qmd
+        - 01c-randomvariables.qmd
+    - part: 02a-language.qmd
+      chapters:
+        - 02b-basics.qmd
+        - 02c-casedeepwater.qmd
+        - 02d-questions.qmd
+        - 02e-data.qmd
+        - 02f-summaries.qmd
+    - part: 03a-fundamentals.qmd
+      chapters: 
+        - 03b-bayesrule.qmd
+        - 03c-modelingsamples.qmd
+        - 03d-priors.qmd
+        - 03e-posteriors.qmd
+        - 03f-point-estimation.qmd
+        - 03g-interval-estimation.qmd
+        - 03h-prediction.qmd
+        - 03i-hypothesis-testing.qmd
+        - 03j-constructing-priors.qmd
+    - part: 04a-computation.qmd
+      chapters:
+        - 04b-mc-integration.qmd
+        - 04c-mcmc.qmd
+        - 04d-mcmc-assessment.qmd
+    - part: 05a-comparing-groups.qmd
+      chapters: 
+        - 05b-study-design.qmd
+        - 05c-independent-groups.qmd
+        - 05d-dependent-groups.qmd
+    - part: 06a-regression.qmd
+      chapters: 
+        - 06b-linear-regression.qmd
+    - references.qmd
+  appendices: 
+    - app-glossary.qmd
+
+bibliography: [refs483notes.bib, packages.bib]
+
+comments: 
+  hypothesis: false
+
+format:
+  html:
+    theme: cosmo
+    css: mystyles.css
+  pdf:
+    documentclass: scrreprt
+    keep-tex: true
+
+execute:
+  echo: false
+  warning: false
+  error: false
+  
+fig-align: center
+fig-cap-location: bottom

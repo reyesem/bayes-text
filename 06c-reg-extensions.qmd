@@ -1,0 +1,165 @@
+# Extensions to the Linear Model {#sec-reg-extensions}
+
+{{< include _setupcode.qmd >}}
+
+It is difficult to develop a general theory of regression models since each model can be uniquely constructed, allowing the predictors to impact the mean response, the variability of the response, or both through a shape parameter, for example.  However, regardless of the regression model being considered, there are some common modeling techniques that can be helpful.
+
+Let $\theta = g\left(\bs{\beta}, \mathbf{Predictors}\right)$ be some parameter characterizing the distribution of the response conditional on some predictors.  For example, $\theta$ might represent the mean response given the predictors.  The previous chapter introduced the idea of $g(\cdot)$ being a linear function of the parameter vector $\bs{\beta}$; that is, the predictors impact $\theta$ through a linear function like
+
+$$\theta_i = \beta_0 + sum_{j=1}^{p} \beta_j (\text{Predictor } j)_i.$$ {#eq-linear-operator}
+
+It turns out that while it may not be immediately obvious, this modeling structure is quite flexible.  In this chapter, we consider some common extensions that can be framed in terms of this linear structure.
+
+
+## Including Categorical Predictors
+When our collection of predictors only consists of quantitative variables, applying @eq-linear-operator is straightforward.  However, when one of the predictors is a categorical variable (for example, the prior activity level of a patient in @exm-therapy), it may not be obvious how to incorporate these into @eq-linear-operator.  This is actually related to the models we considered in @sec-independent-groups; we revisit the idea from a regression perspective.
+
+:::{#exm-anxiety}
+## Anxiety Among College Students
+Suppose we conduct a small survey to determine whether the distribution of the anxiety level of college students differs depending on their class standing (freshman, sophomore, junior, senior).  Let $\theta_i$ represent the parameter of interest governing the distribution of anxiety for the $i$-th student.  We want to let $\theta_i$ depend on class standing within the form illustrated in @eq-linear-operator.
+:::
+
+We approached this problem in @sec-independent-groups essentially by saying
+
+$$(\text{Anxiety})_i \mid \bs{\theta} \ind f\left((\text{Anxiety})_i \mid \theta_j\right),$$
+
+where $\theta_1$ is the parameter for freshman students, $\theta_2$ the parameter for sophomores, $\theta_3$ the parameter for juniors, and $\theta_4$ the parameter for seniors.  Illustrating the impact of class standing on the distribution of anxiety, we might define a new variable
+
+$$(\text{Class})_i = \begin{cases}
+1 & \text{if i-th student is a freshman} \\
+2 & \text{if i-th student is a sophomore} \\
+3 & \text{if i-th student is a junior} \\
+4 & \text{if i-th student is a senior} \end{cases}$$
+
+and then proceeded to say
+
+$$(\text{Anxiety})_i \mid (\text{Class})_i, \bs{\theta} \ind f\left((\text{Anxiety})_i \mid \theta_{(\text{Class})_i}\right).$$ {#eq-indicator-orig}
+
+Again, this was essentially our approach in @sec-independent-groups, and it illustrates that we can allow the parameter to depend upon the predictor (we are doing regression).  It just feels disjoint from the approach we have taken in @sec-linear-regression.  At first glance, we might be tempted to say
+
+$$
+\begin{aligned}
+(\text{Anxiety})_i \mid (\text{Class})_i, \theta_i 
+  &\ind f\left((\text{Anxiety})_i \mid \theta_i\right) \\
+\theta_i 
+  &= \beta_0 + \beta_1 (\text{Class})_i
+\end{aligned}
+$$ {#eq-indicator-linear}
+
+making use of the numeric variable $(\text{Class})_i$ we defined above.  However, this imposes additional structure on the model.  In particular, it suggests that the parameter $\theta$ changes _linearly_ as we move between class standing (freshman to sophomore, junior to senior).  Notice that the additional structure is captured by a reduced number of parameters.  The original model in @eq-indicator-orig had four parameters: $\theta_1, \theta_2, \theta_3$ and $\theta_4$.  The approach in @eq-indicator-linear, however, only has two parameters: $\beta_0$ and $\beta_1$.  These two models are clearly _not_ equivalent.  However, that does not mean that we cannot embed categorical predictors into the linear framework of @eq-linear-operator; we just need a different approach, and that approach involves indicator variables.
+
+:::{#def-indicator-variable}
+## Indicator Variable
+An indicator variable is a binary variable (takes on the value 0 or 1), taking the value 1 when a specific event occurs.  A collection of $k-1$ indicator variables can be used to capture a categorical variable with $k$ levels in a regression model.
+
+  - The "reference group" (or reference level) is the group (level) defined by setting all indicator variables in a regression model to 0.
+:::
+
+For the Anxiety example, we define $4 - 1 = 3$ indicator variables to capture class status:
+
+$$
+\begin{aligned}
+  (\text{Sophomore})_i &= \begin{cases}
+    1 & \text{if i-th student is a Sophomore} \\
+    0 & \text{otherwise} \end{cases} \\
+  (\text{Junior})_i &= \begin{cases}
+    1 & \text{if i-th student is a Junior} \\
+    0 & \text{otherwise} \end{cases} \\
+  (\text{Senior})_i &= \begin{cases}
+    1 & \text{if i-th student is a Senior} \\
+    0 & \text{otherwise.} \end{cases} \\
+\end{aligned}
+$$
+
+We can then place these into the model following the format of @eq-linear-operator; specifically, we have
+
+$$
+\begin{aligned}
+(\text{Anxiety})_i \mid \theta_i 
+  &\ind f\left((\text{Anxiety})_i \mid \theta_i\right) \\
+\theta_i 
+  &= \beta_0 + \beta_1 (\text{Sophomore})_i + \beta_2 (\text{Junior})_i + \beta_3 (\text{Senior})_i.
+\end{aligned}
+$$ {#eq-indicator}
+
+It may at first seem that this model neglects the freshman class; however, the freshman class serves as the reference group (not sophomores or juniors or seniors) so the parameter for these students is represented by $\beta_0$.  Comparing the modeling strategy in @eq-indicator to that in @eq-indicator-orig, we note that
+
+$$
+\begin{aligned}
+\theta_1 &= \beta_0 \\
+\theta_2 &= \beta_0 + \beta_1 \\
+\theta_3 &= \beta_0 + \beta_2 \\
+\theta_4 &= \beta_0 + \beta_3. 
+\end{aligned}
+$$
+
+Our revised model incorporates the categorical predictor while maintaining the general structure/complexity (we have not reduced the number of parameters).
+
+:::{.callout-tip}
+## Big Idea
+A model which is linear in the parameters can accommodate categorical predictors through the inclusion of indicator variables.
+:::
+
+:::{#exm-therapy-likelihood-full}
+## Rehabilitation Therapy Continued
+@exm-therapy described a study to investigate recovery time among patients who have undergone a corrective knee surgery.  Suppose we are willing to believe that the mean recovery time is linearly related to the age of a patient, but we also believe that the mean recovery time may differ depending on the patient's level of activity prior to the surgery.  
+
+Further, suppose that we believe that given the age of the patient and their prior activity level, the recovery time will follow an Exponential distribution.  Write down the likelihood for the observed data conditional on the age of the patient and their prior activity level.
+:::
+
+:::{.solution}
+Generalizing our solution in @exm-therapy-likelihood, we can say that
+
+$$(\text{Recovery Time})_i \mid (\mathbf{Predictors})_i, \bs{\beta} \ind Exp\left(\theta_i\right)$$
+
+where $\theta_i$, the scale term, will depend on the age and prior activity level of the patient, giving a likelihood of 
+
+$$
+\begin{aligned}
+f\left(\mathbf{Recovery Time} \right. &\mid \left. \mathbf{Predictors}, \bs{\beta}\right) 
+    = \prod_{i=1}^{n} \frac{1}{\theta_i} \exp\left\{- \frac{(\text{Recovery Time})_i}{\theta_i}\right\} \\
+    &= \left[\prod_{i=1}^{n} \frac{1}{\theta_i}\right] \exp\left\{-\sum_{i=1}^{n} \frac{(\text{Recovery Time})_i}{\theta_i}\right\}.
+\end{aligned}
+$$
+
+It just remains to define the relationship between the predictors and the scale parameter $\theta_i$.  If we adopt the linear structure of @eq-linear-operator, we have
+
+$$\theta_i = \beta_0 + \beta_1 (\text{Age})_i + \beta_2 (\text{Moderate})_i + \beta_3 (\text{High})_i,$$
+
+where
+
+$$
+\begin{aligned}
+  (\text{Moderate})_i 
+    &= \begin{cases} 1 & \text{if i-th patient has a moderate amount of activity prior to surgery} \\ 0 & \text{otherwise} \end{cases} \\
+  (\text{High})_i
+    &= \begin{cases} 1 & \text{if i-th patient has a high amount of activity prior to surgery} \\ 0 & \text{otherwise}, \end{cases}
+\end{aligned}
+$$
+
+leaving the "low activity" group as the reference group.  
+:::
+
+
+## Curvature
+@eq-linear-operator is typically referred to as a "linear model."  So, it may seem at first glance that such a model restricts us to only consider cases in which the predictor linearly impacts the parameter of interest (the mean response being linearly related to the predictor, for example).  However, @eq-linear-operator is linear _in the parameters_; and therefore, it is flexible enough to capture curvature.  
+
+While there are more sophisticated approaches, to simply illustrate the idea, we can incorporate curvature through higher-order terms.  For example, the following model fits nicely within the linear framework of @eq-linear-operator:
+
+$$\theta_i = \beta_0 + \beta_1 (\text{Predictor 1})_i + \beta_2 (\text{Predictor 1})_i^2.$$
+
+This is linear in the parameters, even though it is not linear in the predictor.  Essentially, we can simply define 
+
+$$(\text{Predictor 2})_i = (\text{Predictor 1})_i^2$$
+
+and then it aligns directly with @eq-linear-operator.  
+
+:::{.callout-note}
+We need not restrict ourselves to polynomial terms.  For example, it is possible to use cubic splines in regression models, and it has even been shown that carefully chosen splines can approximate nearly any form of curvature.
+:::
+
+Of course, we are not restricted to only considering functions which are linear in the parameters; they tend to be commonly used for their simplicity of interpretation when scientific models do not suggest a particular form for the model.  However, we could consider models like
+
+$$\theta_i = \beta_0 e^{\beta_1 (\text{Predictor})_i},$$
+
+which are not linear in the parameters.  These are also valid models and easy to make inference on in the Bayesian framework.

@@ -1,0 +1,3 @@
+# Unit III: Fundamentals of Bayesian Inference {-}
+
+Once we have data, we want to use it to say something about the underlying population.  This is the process of "drawing inference."  There are two large paradigms in the statistical community for defining the framework under which inference occurs. This unit introduces the fundamental components of the Bayesian paradigm. We focus on the mechanics in scenarios for which the process is analytically tractable by hand.  The remainder of the text merely illustrates these principles in more complex scenarios.

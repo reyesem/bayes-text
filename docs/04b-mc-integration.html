@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Bayesian Data Analysis - 17&nbsp; Monte Carlo Integration</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04c-mcmc.html" rel="next">
+<link href="./04a-computation.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="mystyles.css">
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04a-computation.html">Unit IV: Numerical Approaches to Bayesian Computations</a></li><li class="breadcrumb-item"><a href="./04b-mc-integration.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Monte Carlo Integration</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Bayesian Data Analysis</a> 
+        <div class="sidebar-tools-main">
+    <a href="./ma483-text.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./01a-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit I: Essential Probability</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01b-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Essential Probability</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01c-randomvariables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Random Variables and Distributions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./02a-language.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit II: Language of Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02b-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Statistical Process</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02c-casedeepwater.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Case Study: Health Effects of the Deepwater Horizon Oil Spill</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02d-questions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Asking the Right Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02e-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Gathering the Evidence (Data Collection)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02f-summaries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Presenting the Evidence (Summarizing Data)</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./03a-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit III: Fundamentals of Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03b-bayesrule.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bayes Rule</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03c-modelingsamples.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Modeling Samples</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03d-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Quantifying/Modeling Prior Information</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03e-posteriors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Updating Prior Beliefs (Posterior Distributions)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03f-point-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Point Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03g-interval-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Interval Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03h-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Prediction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03i-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03j-constructing-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Constructing Prior Distributions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./04a-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit IV: Numerical Approaches to Bayesian Computations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04b-mc-integration.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Monte Carlo Integration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04c-mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Markov Chain Monte Carlo (MCMC)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04d-mcmc-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Assessing MCMC Samples</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./05a-comparing-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit V: Hierarchical Models for Comparing Groups</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05b-study-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Elements of Good Study Design</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05c-independent-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Considerations when Comparing Independent Groups</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05d-dependent-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Considerations when Comparing Related Groups</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./06a-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit VI: Introduction to Regression Modeling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06b-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Regression Models for a Quantitative Response</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06c-reg-extensions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Extensions to the Linear Model</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06d-reg-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Default Priors in Regression Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06e-qr-factorization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">QR Factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06f-reg-conditions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Assessment for Regression Models for the Mean</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06g-categorical-reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Regression Models for Categorical Responses</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./app-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#law-of-large-numbers" id="toc-law-of-large-numbers" class="nav-link active" data-scroll-target="#law-of-large-numbers"><span class="header-section-number">17.1</span> Law of Large Numbers</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-mc-integration" class="quarto-section-identifier"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Monte Carlo Integration</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>Integration plays an integral part (pun completely intended) in Bayesian inference. Integration is necessary to determine the scaling term for the posterior distribution; it is necessary to perform point and interval estimation; it is necessary for computing posterior probabilities needed for hypotheses testing; integration is at center of all Bayesian computations. The integrals we need to compute are also typically analytically intractable. This chapter introduces a numerical integration technique popular within the statistical community that serves as the foundation for modern Bayesian computational approaches we will consider in the remainder of this unit.</p>
+<p><a href="#exm-integration">Example&nbsp;<span>17.1</span></a> illustrates the need for numerical integration techniques in practice.</p>
+<div id="exm-integration" class="theorem example">
+<p><span class="theorem-title"><strong>Example 17.1 (Pharmacokinetics) </strong></span>When modeling the rate at which a drug is broken down by the body (known as pharmacokinetics), it is often of interest to know the logarithm of the ED50 value (the time at which 50% of the drug has been metabolized by the body). Suppose it is known that for a particular drug, the ED50 value <span class="math inline">\(T\)</span> for the patient population can be modeled using a Gamma distribution with a shape parameter <span class="math inline">\(a = 4\)</span> and a rate parameter of <span class="math inline">\(b = 2\)</span>. That is, the density of <span class="math inline">\(T\)</span> is given by</p>
+<p><span class="math display">\[f(t) = \frac{b^a}{\Gamma(a)} t^{a-1} e^{-bt}\]</span></p>
+<p>on the interval <span class="math inline">\(t &gt; 0\)</span>, where <span class="math inline">\(a = 4\)</span> and <span class="math inline">\(b = 2\)</span>. We are interested in the average logarithm of the ED50 value, which is given by</p>
+<p><span class="math display">\[\int \log(t) f(t) dt.\]</span></p>
+</div>
+<p>While this example is contrived (the parameters governing the distribution of the ED50 value are known explicitly), integrals like this arise in practice regularly. The integral of interest does not yield an analytical solution; a numerical procedure must be used. While there are several numerical methods for integration which are developed and studied in mathematics, many are restricted to low dimensional problems. We need a technique which is applicable in high dimensions. As a foundation, consider the following suggested procedure:</p>
+<ul>
+<li>Let <span class="math inline">\(T_1, T_2, \dots, T_n\)</span> be a random sample such that <span class="math inline">\(T_i \sim f(t)\)</span> for all <span class="math inline">\(i\)</span>.</li>
+<li>Define <span class="math inline">\(Y_i = \log\left(T_i\right)\)</span> for all <span class="math inline">\(i\)</span>.</li>
+<li>Compute <span class="math inline">\(\bar{Y}\)</span>.</li>
+</ul>
+<p>The value of <span class="math inline">\(\bar{Y}\)</span> will estimate the integral! As an initial justification, observe that on average, the estimate is correct. That is, consider taking the expected value of <span class="math inline">\(\bar{Y}\)</span>; specifically,</p>
+<p><span id="eq-mc-step1"><span class="math display">\[
+\begin{aligned}
+  E\left(\bar{Y}\right) &amp;= E\left(n^{-1} \sum_{i=1}^{n} Y_i\right) \\
+    &amp;= E\left(n^{-1} \sum_{i=1}^{n} \log\left(T_i\right)\right) \\
+    &amp;= n^{-1} \sum_{i=1}^{n} E\left(\log\left(T_i\right)\right), \\
+\end{aligned}
+\tag{17.1}\]</span></span></p>
+<p>where the last line is a result of the expectation being a linear operator. Since each <span class="math inline">\(T_i\)</span> is identically distributed (we have a random sample from the population), the expectation is the same for each <span class="math inline">\(i\)</span>; specifically, we have (see <a href="01c-randomvariables.html#def-expectation">Definition&nbsp;<span>2.7</span></a>)</p>
+<p><span class="math display">\[E\left(\log\left(T_i\right)\right) = \int \log(t) f(t) dt.\]</span></p>
+<p>Since the right-hand side is not indexed by <span class="math inline">\(i\)</span>, substituting back into <a href="#eq-mc-step1">Equation&nbsp;<span>17.1</span></a>, we have that</p>
+<p><span class="math display">\[E\left(\bar{Y}\right) = \int \log(t) f(t) dt.\]</span></p>
+<p>That is, the expected value of <span class="math inline">\(\bar{Y}\)</span> is the desired integral. Of course, this just states that the distribution of <span class="math inline">\(\bar{Y}\)</span> (across many samples of size <span class="math inline">\(n\)</span>) will center on the true value of the integral; it does not guarantee the average we compute for any specific <span class="math inline">\(n\)</span> will be accurate. However, the Law of Large numbers gives a stronger result.</p>
+<section id="law-of-large-numbers" class="level2 thm-lln" data-number="17.1">
+<h2 data-number="17.1" class="anchored" data-anchor-id="law-of-large-numbers"><span class="header-section-number">17.1</span> Law of Large Numbers</h2>
+<p>Let <span class="math inline">\(X_1, X_2,\dotsc, X_n\)</span> be independent and identically distributed random variables with density <span class="math inline">\(f(x)\)</span>. Consider a real valued function <span class="math inline">\(g\)</span>. Then, for any <span class="math inline">\(\epsilon &gt; 0\)</span> we have that</p>
+<p><span class="math display">\[Pr\left(\lvert\frac{1}{n}\sum_{i=1}^n g\left(X_i\right) - E\left[g(X)\right]\rvert &gt; \epsilon\right) \rightarrow 0\]</span></p>
+<p>as <span class="math inline">\(n \rightarrow \infty\)</span>, assuming <span class="math inline">\(E\left[g(X)\right]\)</span> exists.</p>
+</section>
+<p>The Law of Large Numbers essentially says that the sample mean can be made arbitrarily close to the expectation it approximates given a large enough sample size. That is, as the sample size increases, the sample mean is really close to the true mean. Using mathematical notation, this means</p>
+<p><span class="math display">\[\frac{1}{n} \sum_{i=1}^{n} g\left(X_i\right) \approx \int g(x) f(x) dx.\]</span></p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Big Idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The Law of Large Numbers allows us to approximate integrals, in the form of expectations of random variables, using a corresponding sample mean.</p>
+</div>
+</div>
+<p>In practice, limited resources (namely, time and money) limit the size of the sample we can consider in our study, which in turn limits the applicability of the Law of Large Numbers. However, numerical integration makes use of a computational study (all the “data” is generated within the computer), where speed and cost are greatly reduced. Therefore, the Law of Large Numbers is more applicable to such computational studies.</p>
+<p>The following pseudo-code illustrates the use of the Law of Large Numbers in order to compute the integral that corresponds to the average logarithm of the ED50 value in <a href="#exm-integration">Example&nbsp;<span>17.1</span></a>:</p>
+<pre><code>let m = 10000;
+
+for i from 1 to m do;
+  x[i] = random_gamma(shape = 4, rate = 2);
+  y[i] = log(x[i]);
+end;
+  
+ybar = mean(y[1:m]);</code></pre>
+<p>Since we have a large sample size, we know that the sample mean computed in the last step will be a good approximation to the integral of interest.</p>
+<p>Upon first inspection, it may seem that the Law of Large Numbers is limited to estimating means. However, nearly every quantity of interest can be written in terms of an integral and therefore approximated using this technique. This includes probabilities, means, quantiles (and therefore credible intervals), variances, and even the evidence in favor of a model. That is, the Law of Large Numbers provides a technique for performing integration numerically, allowing us to compute summaries for the posterior distribution. Because of its dependence on random processes, this integration technique is known as Monte Carlo (or MC) Integration.</p>
+<div id="def-mc-integration" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 17.1 (Monte Carlo Integration) </strong></span>Consider an integral of the form</p>
+<p><span class="math display">\[\int_{\mathcal{S}} g(x) f(x) dx\]</span></p>
+<p>where <span class="math inline">\(f(x)\)</span> is a valid density function for a random variable <span class="math inline">\(X\)</span> with support <span class="math inline">\(\mathcal{S}\)</span>. Then, the following algorithm, known as Monte Carlo (or MC) Integration, gives a numerical approximation to the integral:</p>
+<ol type="1">
+<li>Take a random sample <span class="math inline">\(X_1, X_2, \dotsc, X_m\)</span> such that <span class="math inline">\(X_i \sim f(x)\)</span> for all <span class="math inline">\(i\)</span>, where <span class="math inline">\(m\)</span> is large.</li>
+<li>Compute <span class="math inline">\(m^{-1} \sum_{i=1}^{m} g\left(X_i\right)\)</span>.</li>
+</ol>
+<p>By the Law of Large Numbers,</p>
+<p><span class="math display">\[\frac{1}{m} \sum_{i=1}^{m} g\left(X_i\right) \approx \int_{\mathcal{S}} g(x) f(x) dx.\]</span></p>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Big Idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We can construct Bayesian estimators using only a random sample from the posterior distribution.</p>
+</div>
+</div>
+<div id="exm-probability-integration" class="theorem example">
+<p><span class="theorem-title"><strong>Example 17.2 (Estimating a Posterior Probability) </strong></span>Assume that our beliefs about an unknown parameter <span class="math inline">\(\theta\)</span> (with support on the real line), given an observed sample <span class="math inline">\(\mathbf{x}\)</span>, is characterized by the posterior distribution <span class="math inline">\(\pi(\theta \mid \mathbf{x})\)</span>. Derive a Monte Carlo Integration technique for estimating the probability</p>
+<p><span class="math display">\[Pr(\theta &gt; q \mid \mathbf{x}) = \int_{q}^{\infty} \pi(\theta \mid \mathbf{x}) d\theta.\]</span></p>
+</div>
+<div class="solution proof">
+<p><span class="proof-title"><em>Solution</em>. </span>First, we recognize that the probability of interest is naturally an integral. As currently written, however, the integral is not over the entire support of <span class="math inline">\(\theta\)</span>. Note, however, that we can rewrite the integral to be over the entire support. Specifically, observe that</p>
+<p><span class="math display">\[
+\begin{aligned}
+  Pr(\theta &gt; q \mid \mathbf{x})
+    &amp;= \int_{q}^{\infty} \pi(\theta \mid \mathbf{x}) d\theta \\
+    &amp;= \int_{-\infty}^{q} 0 \cdot \pi(\theta \mid \mathbf{x}) d\theta + \int_{q}^{\infty} 1 \cdot \pi(\theta \mid \mathbf{x}) d\theta \\
+    &amp;= \int_{-\infty}^{\infty} \mathbb{I}(\theta &gt; q) \pi(\theta \mid \mathbf{x}) d\theta,
+\end{aligned}
+\]</span></p>
+<p>where <span class="math inline">\(\mathbb{I}(u)\)</span> is the “indicator function” taking the value 1 if <span class="math inline">\(u\)</span> occurs and 0 otherwise. Specifically, in this case</p>
+<p><span class="math display">\[\mathbb{I}(q &lt; \theta) = \begin{cases} 1 &amp; \text{if } \theta &gt; q \\ 0 &amp; \text{if } \theta \leq q. \end{cases}\]</span></p>
+<p>Having rewritten the integral of interest, we now recognize that</p>
+<p><span class="math display">\[Pr(\theta &gt; q \mid \mathbf{x}) = E\left[\mathbb{I}(\theta &gt; q) \mid \mathbf{x}\right].\]</span></p>
+<p>That is, the posterior probability of interest is the posterior mean of the quantity <span class="math inline">\(\mathbb{I}(\theta &gt; q)\)</span>.</p>
+<p>Applying the Law of Large Numbers, our MC Integration technique is defined by the following algorithm:</p>
+<ol type="1">
+<li>Take a random sample <span class="math inline">\(\theta^*_1, \theta^*_2, \dotsc, \theta^*_m\)</span> from the posterior distribution, <span class="math inline">\(\theta^*_i \sim \pi(\theta \mid \mathbf{x})\)</span> for all <span class="math inline">\(i\)</span> where <span class="math inline">\(m\)</span> is large.</li>
+<li>Compute <span class="math inline">\(m^{-1} \sum_{i=1}^{m} \mathbb{I}\left(\theta^*_i &gt; q\right)\)</span>.</li>
+</ol>
+<p>This sample mean (which essentially computes the proportion of the <span class="math inline">\(\theta^*\)</span> values which exceed <span class="math inline">\(q\)</span>) approximates the integral of interest. Further, according to the Law of Large Numbers, <span class="math inline">\(m\)</span> can be chosen to make the approximation as precise as desired.</p>
+</div>
+<p>In practice, there are multiple unknown parameters; therefore, the posterior distribution is a <em>joint density</em>. As a result, when applying MC Integration in practice, we must often generate random variates from a joint distribution. In general, such generation is difficult to perform directly; however, the process is much simpler if we can create a set of chained expressions to guide the generation. Suppose <span class="math inline">\((X, Y)\)</span> is a vector of two random variables with joint density <span class="math inline">\(f(x, y)\)</span>; recall that</p>
+<p><span class="math display">\[f(x, y) = f(x \mid y) f(y);\]</span></p>
+<p>that is, the joint distribution is the product of a conditional distribution and a marginal distribution. This suggests a procedure for generating from a joint distribution.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Simulating from a Joint Distribution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Let the random vector <span class="math inline">\((X, Y)\)</span> be distributed according to the joint density <span class="math inline">\(f(x,y)\)</span>. The following procedure can be used to simulate observations <span class="math inline">\(\left(X_1, Y_1\right), \left(X_2, Y_2\right), \dotsc, \left(X_m, Y_m\right)\)</span> from the joint density:</p>
+<ol type="1">
+<li>Generate <span class="math inline">\(m\)</span> variates <span class="math inline">\(Y_1, Y_2, \dotsc, Y_m\)</span> from <span class="math inline">\(f(y)\)</span>, the marginal distribution of <span class="math inline">\(Y\)</span>.</li>
+<li>For each <span class="math inline">\(Y_i\)</span>, generate a single <span class="math inline">\(X_i\)</span> from <span class="math inline">\(f(x \mid y)\)</span>, the conditional distribution of <span class="math inline">\(X\)</span> given <span class="math inline">\(Y\)</span>.</li>
+</ol>
+<p>The resulting pairs will have the desired joint distribution. Further, the column of <span class="math inline">\(X\)</span>’s will behave according to the density <span class="math inline">\(f(x)\)</span>, the marginal distribution of <span class="math inline">\(X\)</span>.</p>
+</div>
+</div>
+<p>The Law of Large Numbers guarantees that we can obtain approximations of Bayesian estimators; further, it guarantees these approximations can be made arbitrarily good by choosing a large enough sample size <span class="math inline">\(m\)</span>. Of course, in practice we will specify the value of <span class="math inline">\(m\)</span>; and, since MC Integration relies on random processes, it is reasonable to ask how good the resulting approximation is. Similarly, it is natural to ask how many random samples are needed for an approximation with a specific amount of precision. This is addressed via a version of the Central Limit Theorem.</p>
+<div id="thm-clt" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 17.1 (Central Limit Theorem) </strong></span>Let <span class="math inline">\(X_1, X_2, \dotsc, X_m\)</span> be independent and identically distributed random variables. Consider a real-valued function <span class="math inline">\(g\)</span> such that <span class="math inline">\(E\left[g(X)\right]\)</span> and <span class="math inline">\(Var\left[g(X)\right]\)</span> exist. Then, we have that the quantity</p>
+<p><span class="math display">\[\frac{\sqrt{m} \left[m^{-1} \sum_{i=1}^{m} g\left(X_i\right) - E\left[g(X)\right]\right]}{\sqrt{\widehat{Var}\left[g(X)\right]}}\]</span></p>
+<p>behaves like a standard normal random variable as <span class="math inline">\(m \rightarrow \infty\)</span>.</p>
+</div>
+<p>The Central Limit Theorem provides a way of quantifying the error in the Monte Carlo approximation.</p>
+<div id="def-mc-error" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 17.2 (Monte Carlo Error) </strong></span>Also called the standard error for an approximation of the form <span class="math inline">\(m^{-1} \sum\limits_{k=1}^{m} g\left(X_k\right)\)</span>, the MC error is given by</p>
+<p><span class="math display">\[\sqrt{\frac{1}{m(m-1)} \sum_{k=1}^{m} \left[g\left(X_k\right) - \frac{1}{m} \sum_{j=1}^{m} g\left(X_j\right)\right]^2}\]</span></p>
+<p>which is the sample standard deviation of the generated variates divided by the square root of the number of replications.</p>
+</div>
+<p>We close this chapter by revisiting <a href="03f-point-estimation.html#exm-csec-point-estimate">Example&nbsp;<span>12.1</span></a>; instead of an analytical solution, we apply the techniques discussed in this chapter to provide a numeric solution to estimating the unknown parameter.</p>
+<div id="exm-csec-mc-integration" class="theorem example">
+<p><span class="theorem-title"><strong>Example 17.3 (C-section Deliveries Continued) </strong></span><a href="03c-modelingsamples.html#exm-csec">Example&nbsp;<span>9.1</span></a> introduced a study, a component of which includes estimating the probability of a mother undergoing a C-section delivery at a particular hospital.</p>
+<p><a href="03e-posteriors.html#exm-csec-posterior">Example&nbsp;<span>11.2</span></a> found the posterior distribution to be</p>
+<p><span class="math display">\[\theta \mid \mathbf{x} \sim Beta\left(n + a, n\bar{x} + b\right)\]</span></p>
+<p>where <span class="math inline">\(a = 17, b = 39, n = 15\)</span> and <span class="math inline">\(n\bar{x} = 33\)</span> given the observed data.<br>
+<a href="03f-point-estimation.html#exm-csec-point-estimate">Example&nbsp;<span>12.1</span></a> showed that the posterior mean, estimating the rate of C-sections at the hospital given the observed data, is given by 0.308. First, use MC Integration to compute this estimate, and then estimate the <em>odds</em> of a C-section at the hospital given the observed data.</p>
+</div>
+<div class="solution proof">
+<p><span class="proof-title"><em>Solution</em>. </span>The posterior mean is given by</p>
+<p><span class="math display">\[E\left(\theta \mid \mathbf{x}\right) = \int \theta \pi(\theta \mid \mathbf{x}) d\theta.\]</span></p>
+<p>Now, as seen in <a href="03f-point-estimation.html#exm-csec-point-estimate">Example&nbsp;<span>12.1</span></a>, there is a closed-form expression for this quantity. However, here, we rely on MC Integration technique. The following pseudo-code illustrates the process:</p>
+<pre><code>let m = 10000;
+
+for i from 1 to m do;
+  x[i] = random_beta(shape1 = (15 + 17), shape2 = (33 + 39));
+end;
+  
+xbar = mean(x[1:m]);</code></pre>
+<p>The quantity <code>xbar</code> is an estimate of the posterior mean. This code requires we have access to a function <code>random_beta()</code> which generates a (pseudo) random variate from a Beta distribution with specified shape parameters. Given a function <code>standard_deviation()</code> which computes the sample standard deviation of a vector of values, we can compute the MC error in the approximation with</p>
+<pre><code>MCerrorx = sqrt(standard_deviation(x[1:m]) / m);</code></pre>
+<p>One implementation of this algorithm gave an estimate of 0.308 with an MC error of 0.0021. While this computation simply illustrated the process, the next is computation greatly simplifies our burden of work.</p>
+<p>We now consider estimating the odds of a C-section at this hospital, given the data. The odds of an event with rate <span class="math inline">\(\theta\)</span> are defined as <span class="math inline">\(\theta / (1 - \theta)\)</span>. Appealing to <a href="01c-randomvariables.html#def-expectation">Definition&nbsp;<span>2.7</span></a>, the posterior mean of the odds is then</p>
+<p><span class="math display">\[E\left[\frac{\theta}{1 - \theta} \mid \mathbf{x}\right] = \int \frac{\theta}{1-\theta} \pi(\theta \mid \mathbf{x}) d\theta.\]</span></p>
+<p>A closed-form solution for this integral is not readily available; however, a slight modification of our previous pseudo-code allows us to numerically compute this integral:</p>
+<pre><code>let m = 10000;
+
+for i from 1 to m do;
+  x[i] = random_beta(shape1 = (15 + 17), shape2 = (33 + 39));
+  y[i] = x[i] / (1 - x[i]);
+end;
+  
+ybar = mean(y[1:m]);
+MCerrory = sqrt(standard_deviation(y[1:m] / m));</code></pre>
+<p>The quantity <code>ybar</code> is an estimate of the posterior mean for the odds of interest. One implementation of this algorithm gave an estimate of 0.451 with an MC error of 0.0031.</p>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Big Idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Given a large random sample from the posterior distribution, we approximate posterior quantities of interest using the corresponding sample statistic.</p>
+</div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./04a-computation.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Unit IV: Numerical Approaches to Bayesian Computations</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04c-mcmc.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Markov Chain Monte Carlo (MCMC)</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

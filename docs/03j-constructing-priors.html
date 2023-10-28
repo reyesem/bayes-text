@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Bayesian Data Analysis - 16&nbsp; Constructing Prior Distributions</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04a-computation.html" rel="next">
+<link href="./03i-hypothesis-testing.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="mystyles.css">
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./03a-fundamentals.html">Unit III: Fundamentals of Bayesian Inference</a></li><li class="breadcrumb-item"><a href="./03j-constructing-priors.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Constructing Prior Distributions</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Bayesian Data Analysis</a> 
+        <div class="sidebar-tools-main">
+    <a href="./ma483-text.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./01a-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit I: Essential Probability</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01b-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Essential Probability</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01c-randomvariables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Random Variables and Distributions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./02a-language.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit II: Language of Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02b-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Statistical Process</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02c-casedeepwater.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Case Study: Health Effects of the Deepwater Horizon Oil Spill</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02d-questions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Asking the Right Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02e-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Gathering the Evidence (Data Collection)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02f-summaries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Presenting the Evidence (Summarizing Data)</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./03a-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit III: Fundamentals of Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03b-bayesrule.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bayes Rule</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03c-modelingsamples.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Modeling Samples</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03d-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Quantifying/Modeling Prior Information</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03e-posteriors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Updating Prior Beliefs (Posterior Distributions)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03f-point-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Point Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03g-interval-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Interval Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03h-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Prediction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03i-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03j-constructing-priors.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Constructing Prior Distributions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./04a-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit IV: Numerical Approaches to Bayesian Computations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04b-mc-integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Monte Carlo Integration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04c-mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Markov Chain Monte Carlo (MCMC)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04d-mcmc-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Assessing MCMC Samples</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./05a-comparing-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit V: Hierarchical Models for Comparing Groups</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05b-study-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Elements of Good Study Design</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05c-independent-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Considerations when Comparing Independent Groups</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05d-dependent-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Considerations when Comparing Related Groups</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./06a-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit VI: Introduction to Regression Modeling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06b-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Regression Models for a Quantitative Response</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06c-reg-extensions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Extensions to the Linear Model</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06d-reg-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Default Priors in Regression Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06e-qr-factorization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">QR Factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06f-reg-conditions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Assessment for Regression Models for the Mean</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06g-categorical-reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Regression Models for Categorical Responses</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./app-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#elicitation-from-experts" id="toc-elicitation-from-experts" class="nav-link active" data-scroll-target="#elicitation-from-experts"><span class="header-section-number">16.1</span> Elicitation from Experts</a></li>
+  <li><a href="#mixture-priors" id="toc-mixture-priors" class="nav-link" data-scroll-target="#mixture-priors"><span class="header-section-number">16.2</span> Mixture Priors</a></li>
+  <li><a href="#chains" id="toc-chains" class="nav-link" data-scroll-target="#chains"><span class="header-section-number">16.3</span> Chains</a></li>
+  <li><a href="#non-informative-priors" id="toc-non-informative-priors" class="nav-link" data-scroll-target="#non-informative-priors"><span class="header-section-number">16.4</span> Non-Informative Priors</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-constructing-priors" class="quarto-section-identifier"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Constructing Prior Distributions</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>The selection of a prior distribution is integral to the Bayesian framework; it is also the most criticized component. There is rarely sufficient prior information to determine an exact prior distribution; that is, rarely do we know for certain the family which represents the distribution as well as the exact parameters. Instead, we make some modeling assumptions, as with any analysis. In this chapter, we examine some common paths when constructing prior distributions and the implications of allowing the prior distribution to vary across analysts.</p>
+<section id="elicitation-from-experts" class="level2" data-number="16.1">
+<h2 data-number="16.1" class="anchored" data-anchor-id="elicitation-from-experts"><span class="header-section-number">16.1</span> Elicitation from Experts</h2>
+<p>Ideally, the prior distribution would not be arbitrary but guided by experts. <a href="03d-priors.html#exm-csec-prior">Example&nbsp;<span>10.2</span></a>, for example, illustrated the use of statements from experts to form a parametric approximation to the prior information. We elicited information about the uncertainty in order to determine values for the hyperparameters — those values that determine the specific shape of the prior distribution.</p>
+<p>For <a href="03d-priors.html#exm-csec-prior">Example&nbsp;<span>10.2</span></a>, the prior distribution chosen was a conjugate prior.</p>
+<div id="def-conjugate-prior" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 16.1 (Conjugate Prior) </strong></span>A prior distribution chosen such that the posterior distribution belongs to the same family as the prior distribution, with the (hyper)parameters that govern the family updated based on the observed data.</p>
+</div>
+<p>In <a href="03d-priors.html#exm-csec-prior">Example&nbsp;<span>10.2</span></a>, we chose a Beta distribution to represent the prior, and we found in <a href="03e-posteriors.html#exm-csec-posterior">Example&nbsp;<span>11.2</span></a>, the posterior distribution also belonged to the Beta family. The choice to use a conjugate prior was often done historically in order to simplify computation in an era where computing power was limited. In the era of higher-speed computing, this is no longer necessary.</p>
+<p>One argument for the use of conjugate priors is that the form is invariant to the data; that is, the data is restricted in what it can say about the unknown parameter. The data can update our beliefs, but it cannot update the family which encodes those beliefs.</p>
+<p>While we will not go into details here, it is <em>almost</em> always possible to construct a conjugate prior. And, if chosen carefully, that prior can approximate nearly any prior information given.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The posterior distribution is always a combination of the prior distribution and the likelihood. Conjugate priors make that very clear. As the sample gets large, the prior distribution is swamped by the data; and, as the sample size increases, Bayesian inference agrees with Frequentist inference.</p>
+</div>
+</div>
+<p>Again, <a href="03d-priors.html#exm-csec-prior">Example&nbsp;<span>10.2</span></a> illustrated combining the expert opinions provided with a parametric family in order to construct a prior distribution. When we are unable to determine a suitable parametric approximation for the prior beliefs provided, a “histogram approach” is possible.</p>
+<div id="def-histogram-prior" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 16.2 (Histogram Approach to Constructing a Prior) </strong></span>Using expert information, attach probability to various intervals for the parameter. Specifically,</p>
+<ul>
+<li>Define <span class="math inline">\(m\)</span> intervals <span class="math inline">\(\left(\theta_{j-1}, \theta_j\right)\)</span> for <span class="math inline">\(j = 1, 2, \dotsc, m\)</span> that partition the parameter space; define <span class="math inline">\(\theta_0\)</span> as the lower bound of the support for the parameter, and define <span class="math inline">\(\theta_m\)</span> as the upper bound of the support for the parameter.</li>
+<li>Eliciting expert opinions, assign probability <span class="math inline">\(\pi_j\)</span> to each interval: <span class="math inline">\(\pi_j = Pr\left(\theta_{j-1} &lt; \theta &lt; \theta_j\right)\)</span> for each <span class="math inline">\(j = 1, 2, \dotsc, m\)</span>.</li>
+<li>Set the prior <span class="math inline">\(\pi(\theta)\)</span> to be the piecewise distribution over this interval where <span class="math inline">\(\sum_{j=1}^{m} \pi_j = 1\)</span>.</li>
+</ul>
+</div>
+<p>There have been critiques of eliciting information from experts. Estimates given may be biased, due to the current availability of data on which the experts are making their informed decisions. We tend to be overconfident in our opinions or go with our initial reaction instead of allowing our beliefs to be updated. We also tend to want to create the prior only after observing the data, despite the fact that the prior should capture our beliefs prior to observing the data.</p>
+<p>The experts may not actually represent a reasonable sample to capture widespread prior belief. How does one determine who is expertly qualified to speak on a particular topic? How do you rank levels of expertise?</p>
+<p>We mention these critiques because more important than the choices we make is that those choices be clearly documented. It is okay to construct work that others critique; that is how science develops. No study is perfect, and being able to identify and own the limitations of our study and analysis is critical to the development of knowledge.</p>
+</section>
+<section id="mixture-priors" class="level2" data-number="16.2">
+<h2 data-number="16.2" class="anchored" data-anchor-id="mixture-priors"><span class="header-section-number">16.2</span> Mixture Priors</h2>
+<p><a href="03i-hypothesis-testing.html"><span>Chapter&nbsp;15</span></a> introduced the idea of a mixture distribution (<a href="03i-hypothesis-testing.html#def-mixture-distribution">Definition&nbsp;<span>15.3</span></a>) for constructing a prior. While we discussed its use for a particular case, mixture distributions have wider applicability. Suppose we would like to work with a parametric approximation, but we cannot find a parametric family which captures the structure suggested by the prior information. In these cases, combining multiple distributions may be appropriate.</p>
+<p>As an example, suppose we have a parameter on the support <span class="math inline">\((0, 1)\)</span>. For such a parameter, it is natural to consider the Beta distribution for a prior. However, suppose our prior beliefs suggest a multimodal distribution similar to that in <a href="#fig-mixture-prior">Figure&nbsp;<span>16.1</span></a>; it is impossible to choose hyperparameters for a Beta distribution that would result in such a prior. Instead, we could achieve such a prior by mixing two Beta distributions.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-mixture-prior" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="./images/fig-mixture-prior-1.png" class="img-fluid figure-img" style="width:80.0%" alt="A continuous density which is multimodal with modes just below 0.25 and just above 0.75."></p>
+<figcaption class="figure-caption">Figure&nbsp;16.1: Illustration of a mixture prior for a parameter on the interval (0, 1).</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="def-general-mixture-distribution" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 16.3 (General Mixture Distribution) </strong></span>Let <span class="math inline">\(\theta\)</span> be a parameter with support <span class="math inline">\(\Theta\)</span>, and let <span class="math inline">\(\pi_k(\theta)\)</span> be a valid distribution on the support, for <span class="math inline">\(k = 1, 2, \dotsc, K\)</span>. Then,</p>
+<p><span class="math display">\[\pi(\theta) = \sum_{k=1}^{K} w_k \pi_k(\theta)\]</span></p>
+<p>is a valid prior distribution provided <span class="math inline">\(\sum_{k=1}^{K} w_k = 1\)</span>.</p>
+</div>
+<p>It turns out that if each component of the mixture distribution <span class="math inline">\(\pi_k(\theta)\)</span> is a member of the conjugate family, the entire prior will be conjugate (a weighted average of distributions). This was illustrated in <a href="03i-hypothesis-testing.html#exm-csec-hypotheses">Example&nbsp;<span>15.1</span></a>.</p>
+<p>Nothing requires that the individual components of a mixture distribution be of the same family. For example, we might choose to mix a Normal distribution with a t-distribution in order to capture the presence of some outliers.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While we have described the use of a mixture distribution for the prior distribution, nothing prevents the use from using a mixture distribution for the likelihood.</p>
+</div>
+</div>
+<p>It has been shown that any distribution can be approximated by some mixture distribution. That is, if we choose <span class="math inline">\(K\)</span> to be large enough, we can approximate any distributional shape with a mixture distribution.</p>
+</section>
+<section id="chains" class="level2" data-number="16.3">
+<h2 data-number="16.3" class="anchored" data-anchor-id="chains"><span class="header-section-number">16.3</span> Chains</h2>
+<p>Within this unit, we have developed the fundamental concepts of Bayesian inference in a general setting. We have avoided a litany of examples and instead opted to illustrate the concepts with a single unifying example throughout the text (<a href="03c-modelingsamples.html#exm-csec">Example&nbsp;<span>9.1</span></a>). In both this example and the exposition in the text, we have acted as though there is a single parameter <span class="math inline">\(\theta\)</span> governing the likelihood. Many interesting questions, however, involve models for the data that depend upon multiple parameters. These types of problems often necessitate the need for numerical solutions, which we address in the next unit. Here, we simply discuss a common tool for constructing priors over multiple parameters.</p>
+<p>When <span class="math inline">\(\theta\)</span> is a parameter <em>vector</em>, then <span class="math inline">\(\pi(\theta)\)</span> is actually a <em>joint</em> density across all parameters. Therefore, one key decision that must be made is whether, a priori, we believe these parameters to be independent of one another.</p>
+<div id="exm-heights" class="theorem example">
+<p><span class="theorem-title"><strong>Example 16.1 (Heights of Children) </strong></span>During early development, children are regularly benchmarked against national growth charts. One such chart traces a child’s height as they grow. However, these charts were developed using the entire population of “healthy” children. Suppose I am interested in developing a growth chart for children with Hispanic parents, as I believe they tend to be a bit shorter, on average. It is typical to model heights using a Normal distribution, which has two unknown parameters (which govern the location and spread of the distribution).</p>
+<p>We consider developing a likelihood and prior for this process.</p>
+</div>
+<p>The likelihood for the above example is readily available if we are willing to assume a random sample of <span class="math inline">\(n\)</span> children (of the same age) born to Hispanic parents:</p>
+<p><span class="math display">\[
+\begin{aligned}
+  f(\mathbf{y} \mid \mu, \tau)
+    &amp;= \prod_{i=1}^{n} \frac{\tau^{1/2}}{\sqrt{2\pi}} e^{-\tau/2 (y_i - \mu)^2} \\
+    &amp;= \frac{\tau^{n/2}}{(2\pi)^{n/2}} e^{-(\tau/2)\sum_{i=1}^{n}(y_i - \mu)^2}
+\end{aligned}
+\]</span></p>
+<p>where we have defined the likelihood in terms of the mean <span class="math inline">\(\mu\)</span> and the <em>precision</em> <span class="math inline">\(\tau\)</span>, which is the inverse of the variance. The likelihood was simplified by assuming the height of one child is independent of the height of any other child. Suppose we are further willing to believe the <em>parameters</em> are independent of one another; then, it is reasonable to propose the prior distributions independently. Choosing a Normal prior for <span class="math inline">\(\mu\)</span> and a Gamma prior for <span class="math inline">\(\tau\)</span>, we could then propose</p>
+<p><span class="math display">\[
+\begin{aligned}
+  \pi(\mu) &amp;= \frac{\sqrt{b}}{\sqrt{2\pi}} e^{-b/2 (\mu - a)^2} \\
+  \pi(\tau) &amp;= \frac{s^r}{\Gamma(r)} \tau^{r - 1} e^{-s\tau} \\
+  \Rightarrow \pi(\mu, \tau) &amp;= \pi(\mu) \pi(\tau).
+\end{aligned}
+\]</span></p>
+<p>The joint prior across the parameters is easy to specify because of the independence assumption. Of course, nothing requires we assume the parameters are independent of one another; this was a modeling assumption. A different set of beliefs would lead to a different structure for the prior. For example, the prior given by</p>
+<p><span class="math display">\[
+\begin{aligned}
+  \pi(\tau) &amp;= \frac{s^2}{\Gamma(r)} \tau^{r - 1} e^{-s\tau} \\
+  \pi(\mu \mid \tau) &amp;= \frac{\sqrt{\tau}}{\sqrt{2\pi}} e^{-\tau/2 (\mu - a)^2} \\
+  \Rightarrow \pi(\mu, \tau) &amp;= \pi(\mu \mid \tau) \pi(\tau)
+\end{aligned}
+\]</span></p>
+<p>suggests a Gamma prior for <span class="math inline">\(\tau\)</span> and a Normal prior for <span class="math inline">\(\mu\)</span> <em>conditional</em> on the value of <span class="math inline">\(\tau\)</span>. This hierarchical structure allows the mean <span class="math inline">\(\mu\)</span> to depend on the precision <span class="math inline">\(\tau\)</span>. The joint distribution of the parameters (prior to seeing the data) is then the product of the marginal distribution of <span class="math inline">\(\tau\)</span> and the conditional distribution of <span class="math inline">\(\mu \mid \tau\)</span>.</p>
+<p>This process of defining a prior in stages, each stage conditioning on parameters for which a prior distribution is specified, is known as “chaining.”</p>
+<p>Regardless of whether we form a prior through assuming independence or through chaining, the prior predictive distribution (the denominator in Bayes Theorem) will have the form</p>
+<p><span class="math display">\[\int \int f(\mathbf{y} \mid \mu, \tau) \pi(\mu, \tau) d\mu d\tau.\]</span></p>
+<p>The more parameters we have, the more complex the integration in the denominator; this is what motivates the computational methods we examine in the next unit.</p>
+</section>
+<section id="non-informative-priors" class="level2" data-number="16.4">
+<h2 data-number="16.4" class="anchored" data-anchor-id="non-informative-priors"><span class="header-section-number">16.4</span> Non-Informative Priors</h2>
+<p>Each of the above sections assumes that we have prior information that needs to be encoded into a distribution; we now consider the case when we have very little (or no) prior information. In such a setting, we must determine how we encode “ignorance.”</p>
+<div id="def-laplace-prior" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 16.4 (Laplace Prior) </strong></span>The Laplace prior, also known as a “flat” prior, considers the form</p>
+<p><span class="math display">\[\pi(\theta) = 1 \qquad \forall \theta \in \Theta.\]</span></p>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For any unbounded support <span class="math inline">\(\Theta\)</span>, the Laplace prior will be <em>improper</em>; that is,</p>
+<p><span class="math display">\[\int \pi(\theta) d\theta = \infty.\]</span></p>
+<p>In such settings the Laplace prior is not actually a valid density function. This seems like it is breaking all the rules, and to some degree it is, but it is still commonly used.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The Bayes Factor should never be computed when you have an improper prior as the prior odds are not defined since there is no valid probability of each hypothesis a priori.</p>
+</div>
+</div>
+<p>The Laplace prior is a common default prior when no (or little) prior information is available. However, a flat prior cannot represent total ignorance. When the parameter space is unbounded, notice that a flat prior essentially says that no matter how large of a value <span class="math inline">\(q\)</span> you imagine, <span class="math inline">\(Pr\left(\theta &gt; q\right) = \infty\)</span> — that is, there is always infinite probability that <span class="math inline">\(\theta\)</span> is larger than you can imagine.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Big Idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Flat priors are chosen because they are easily overwhelmed by the observed data.</p>
+</div>
+</div>
+<p>The benefit of a flat prior is that the posterior distribution is proportional to the likelihood. The idea here is to make the Bayesian framework dependent solely on the data, similar to a Frequentist approach (though the two are still not guaranteed to give the same results).</p>
+<p>Flat priors are a subset of a larger class of priors that continues to be an active area of research; this larger class of priors is determined solely by the form of the likelihood.</p>
+<div id="def-noninformative-prior" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 16.5 (Noninformative Prior) </strong></span>A prior distribution which is derived solely based on the form of the likelihood.</p>
+</div>
+<p>A noninformative prior seems like a compromise between Bayesians and those who dislike the subjective nature of a prior distribution. So, why is this not the standard? On the one hand, true Bayesians argue that we should make use of prior information; we should not seek to make use of only the data available in that single study. This allows the information from one study to become the prior information for a follow-up study instead of beginning from scratch. Second, there is a potential pitfall when using noninformative priors when they are improper — it is possible for the posterior distribution to be improper (which is a nice way of saying it is not a distribution at all)! If the posterior distribution is improper, it cannot yield any valid inference on the parameters.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Valid inference cannot be made when the posterior distribution is improper.</p>
+</div>
+</div>
+<p>An improper prior <em>can</em> lead to an improper posterior; however, a proper prior will <em>always</em> lead to a proper posterior. The danger is that software which automates Bayesian analyses currently have no way of checking if a posterior is proper; so, this must be done manually. As computing the posterior can be difficult (the entire reason for the next unit), this often involves bounding the integral in some way — a job for true mathematicians.</p>
+<p>Fear around improper priors often leads to what are known as vague priors. This is taking a parametric family and choosing the hyperparameters to result in a massive variance so that the prior distribution, while proper, appears flat over the parameter space. The idea here is to allow the data to easily overwhelm any prior information.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Big Idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Noninformative priors try to make it easy for the likelihood to dominate the prior distribution in the computation of the posterior distribution.</p>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./03i-hypothesis-testing.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04a-computation.html" class="pagination-link">
+        <span class="nav-page-text">Unit IV: Numerical Approaches to Bayesian Computations</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

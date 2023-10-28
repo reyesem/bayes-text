@@ -1,0 +1,14 @@
+"0","
+
+\newcommand{\norm}[1]{\lVert#1\rVert}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+\newcommand{\iid}{\stackrel{\text{IID}}{\sim}}
+\newcommand{\ind}{\stackrel{\text{Ind}}{\sim}}
+  
+\newcommand{\bm}[1]{\mathbf{#1}}
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+\newcommand{\bbeta}{\bs{\beta}}
+  
+\newcommand{\Ell}{\mathcal{L}}
+\newcommand{\indep}{\perp\negthickspace\negmedspace\perp}"
+"2","Warning: don't know how to handle 'asis' engine output"

@@ -1,0 +1,3 @@
+# Unit V: Hierarchical Models for Comparing Groups {-}
+
+Unit III introduced the fundamentals of the Bayesian framework.  While the text introduced these ideas in a general setting, the running example through that unit considered modeling a single response variable.  In this unit, we consider comparing a response across groups.  While the framework remains the same, we discuss additional considerations to be made in these settings.

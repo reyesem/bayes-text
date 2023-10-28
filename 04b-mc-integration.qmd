@@ -1,0 +1,267 @@
+# Monte Carlo Integration {#sec-mc-integration}
+
+{{< include _setupcode.qmd >}}
+
+Integration plays an integral part (pun completely intended) in Bayesian inference.  Integration is necessary to determine the scaling term for the posterior distribution; it is necessary to perform point and interval estimation; it is necessary for computing posterior probabilities needed for hypotheses testing; integration is at center of all Bayesian computations.  The integrals we need to compute are also typically analytically intractable.  This chapter introduces a numerical integration technique popular within the statistical community that serves as the foundation for modern Bayesian computational approaches we will consider in the remainder of this unit.
+
+@exm-integration illustrates the need for numerical integration techniques in practice.
+
+:::{#exm-integration}
+## Pharmacokinetics
+When modeling the rate at which a drug is broken down by the body (known as pharmacokinetics), it is often of interest to know the logarithm of the ED50 value (the time at which 50% of the drug has been metabolized by the body).  Suppose it is known that for a particular drug, the ED50 value $T$ for the patient population can be modeled using a Gamma distribution with a shape parameter $a = 4$ and a rate parameter of $b = 2$.  That is, the density of $T$ is given by
+
+$$f(t) = \frac{b^a}{\Gamma(a)} t^{a-1} e^{-bt}$$
+
+on the interval $t > 0$, where $a = 4$ and $b = 2$.  We are interested in the average logarithm of the ED50 value, which is given by
+
+$$\int \log(t) f(t) dt.$$
+:::
+
+While this example is contrived (the parameters governing the distribution of the ED50 value are known explicitly), integrals like this arise in practice regularly.  The integral of interest does not yield an analytical solution; a numerical procedure must be used.  While there are several numerical methods for integration which are developed and studied in mathematics, many are restricted to low dimensional problems.  We need a technique which is applicable in high dimensions.  As a foundation, consider the following suggested procedure:
+
+  - Let $T_1, T_2, \dots, T_n$ be a random sample such that $T_i \sim f(t)$ for all $i$.
+  - Define $Y_i = \log\left(T_i\right)$ for all $i$.
+  - Compute $\bar{Y}$.
+
+The value of $\bar{Y}$ will estimate the integral!  As an initial justification, observe that on average, the estimate is correct.  That is, consider taking the expected value of $\bar{Y}$; specifically,
+
+$$
+\begin{aligned}
+  E\left(\bar{Y}\right) &= E\left(n^{-1} \sum_{i=1}^{n} Y_i\right) \\
+    &= E\left(n^{-1} \sum_{i=1}^{n} \log\left(T_i\right)\right) \\
+    &= n^{-1} \sum_{i=1}^{n} E\left(\log\left(T_i\right)\right), \\
+\end{aligned}
+$$ {#eq-mc-step1}
+
+where the last line is a result of the expectation being a linear operator.  Since each $T_i$ is identically distributed (we have a random sample from the population), the expectation is the same for each $i$; specifically, we have (see @def-expectation)
+
+$$E\left(\log\left(T_i\right)\right) = \int \log(t) f(t) dt.$$
+
+Since the right-hand side is not indexed by $i$, substituting back into @eq-mc-step1, we have that 
+
+$$E\left(\bar{Y}\right) = \int \log(t) f(t) dt.$$
+
+That is, the expected value of $\bar{Y}$ is the desired integral.  Of course, this just states that the distribution of $\bar{Y}$ (across many samples of size $n$) will center on the true value of the integral; it does not guarantee the average we compute for any specific $n$ will be accurate.  However, the Law of Large numbers gives a stronger result.
+
+:::{.thm-lln}
+## Law of Large Numbers
+Let $X_1, X_2,\dotsc, X_n$ be independent and identically distributed random variables with density $f(x)$.  Consider a real valued function $g$.  Then, for any $\epsilon > 0$ we have that
+
+$$Pr\left(\abs{\frac{1}{n}\sum_{i=1}^n g\left(X_i\right) - E\left[g(X)\right]} > \epsilon\right) \rightarrow 0$$
+
+as $n \rightarrow \infty$, assuming $E\left[g(X)\right]$ exists.
+:::
+
+The Law of Large Numbers essentially says that the sample mean can be made arbitrarily close to the expectation it approximates given a large enough sample size.  That is, as the sample size increases, the sample mean is really close to the true mean.  Using mathematical notation, this means
+
+$$\frac{1}{n} \sum_{i=1}^{n} g\left(X_i\right) \approx \int g(x) f(x) dx.$$
+
+:::{.callout-tip}
+## Big Idea
+The Law of Large Numbers allows us to approximate integrals, in the form of expectations of random variables, using a corresponding sample mean.
+:::
+
+In practice, limited resources (namely, time and money) limit the size of the sample we can consider in our study, which in turn limits the applicability of the Law of Large Numbers.  However, numerical integration makes use of a computational study (all the "data" is generated within the computer), where speed and cost are greatly reduced.  Therefore, the Law of Large Numbers is more applicable to such computational studies.
+
+The following pseudo-code illustrates the use of the Law of Large Numbers in order to compute the integral that corresponds to the average logarithm of the ED50 value in @exm-integration:
+
+```
+let m = 10000;
+
+for i from 1 to m do;
+  x[i] = random_gamma(shape = 4, rate = 2);
+  y[i] = log(x[i]);
+end;
+  
+ybar = mean(y[1:m]);
+```
+
+Since we have a large sample size, we know that the sample mean computed in the last step will be a good approximation to the integral of interest.
+
+Upon first inspection, it may seem that the Law of Large Numbers is limited to estimating means.  However, nearly every quantity of interest can be written in terms of an integral and therefore approximated using this technique.  This includes probabilities, means, quantiles (and therefore credible intervals), variances, and even the evidence in favor of a model.  That is, the Law of Large Numbers provides a technique for performing integration numerically, allowing us to compute summaries for the posterior distribution.  Because of its dependence on random processes, this integration technique is known as Monte Carlo (or MC) Integration.  
+
+:::{#def-mc-integration}
+## Monte Carlo Integration
+Consider an integral of the form
+
+$$\int_{\mathcal{S}} g(x) f(x) dx$$
+
+where $f(x)$ is a valid density function for a random variable $X$ with support $\mathcal{S}$.  Then, the following algorithm, known as Monte Carlo (or MC) Integration, gives a numerical approximation to the integral:
+
+  1. Take a random sample $X_1, X_2, \dotsc, X_m$ such that $X_i \sim f(x)$ for all $i$, where $m$ is large.
+  2. Compute $m^{-1} \sum_{i=1}^{m} g\left(X_i\right)$.
+  
+By the Law of Large Numbers,
+
+$$\frac{1}{m} \sum_{i=1}^{m} g\left(X_i\right) \approx \int_{\mathcal{S}} g(x) f(x) dx.$$
+:::
+
+:::{.callout-tip}
+## Big Idea
+We can construct Bayesian estimators using only a random sample from the posterior distribution.
+:::
+
+:::{#exm-probability-integration}
+## Estimating a Posterior Probability
+Assume that our beliefs about an unknown parameter $\theta$ (with support on the real line), given an observed sample $\bm{x}$, is characterized by the posterior distribution $\pi(\theta \mid \bm{x})$.  Derive a Monte Carlo Integration technique for estimating the probability
+
+$$Pr(\theta > q \mid \bm{x}) = \int_{q}^{\infty} \pi(\theta \mid \bm{x}) d\theta.$$
+:::
+
+:::{.solution}
+First, we recognize that the probability of interest is naturally an integral.  As currently written, however, the integral is not over the entire support of $\theta$.  Note, however, that we can rewrite the integral to be over the entire support.  Specifically, observe that
+
+$$
+\begin{aligned}
+  Pr(\theta > q \mid \bm{x})
+    &= \int_{q}^{\infty} \pi(\theta \mid \bm{x}) d\theta \\
+    &= \int_{-\infty}^{q} 0 \cdot \pi(\theta \mid \bm{x}) d\theta + \int_{q}^{\infty} 1 \cdot \pi(\theta \mid \bm{x}) d\theta \\
+    &= \int_{-\infty}^{\infty} \mathbb{I}(\theta > q) \pi(\theta \mid \bm{x}) d\theta,
+\end{aligned}
+$$
+
+where $\mathbb{I}(u)$ is the "indicator function" taking the value 1 if $u$ occurs and 0 otherwise.  Specifically, in this case
+
+$$\mathbb{I}(q < \theta) = \begin{cases} 1 & \text{if } \theta > q \\ 0 & \text{if } \theta \leq q. \end{cases}$$
+
+Having rewritten the integral of interest, we now recognize that
+
+$$Pr(\theta > q \mid \bm{x}) = E\left[\mathbb{I}(\theta > q) \mid \bm{x}\right].$$
+
+That is, the posterior probability of interest is the posterior mean of the quantity $\mathbb{I}(\theta > q)$.
+
+Applying the Law of Large Numbers, our MC Integration technique is defined by the following algorithm:
+
+  1. Take a random sample $\theta^*_1, \theta^*_2, \dotsc, \theta^*_m$ from the posterior distribution, $\theta^*_i \sim \pi(\theta \mid \bm{x})$ for all $i$ where $m$ is large.
+  2. Compute $m^{-1} \sum_{i=1}^{m} \mathbb{I}\left(\theta^*_i > q\right)$.
+  
+This sample mean (which essentially computes the proportion of the $\theta^*$ values which exceed $q$) approximates the integral of interest.  Further, according to the Law of Large Numbers, $m$ can be chosen to make the approximation as precise as desired.
+:::
+
+In practice, there are multiple unknown parameters; therefore, the posterior distribution is a _joint density_.  As a result, when applying MC Integration in practice, we must often generate random variates from a joint distribution.  In general, such generation is difficult to perform directly; however, the process is much simpler if we can create a set of chained expressions to guide the generation.  Suppose $(X, Y)$ is a vector of two random variables with joint density $f(x, y)$; recall that
+
+$$f(x, y) = f(x \mid y) f(y);$$
+
+that is, the joint distribution is the product of a conditional distribution and a marginal distribution.  This suggests a procedure for generating from a joint distribution.
+
+:::{.callout-tip}
+## Simulating from a Joint Distribution
+Let the random vector $(X, Y)$ be distributed according to the joint density $f(x,y)$.  The following procedure can be used to simulate observations $\left(X_1, Y_1\right), \left(X_2, Y_2\right), \dotsc, \left(X_m, Y_m\right)$ from the joint density:
+
+  1. Generate $m$ variates $Y_1, Y_2, \dotsc, Y_m$ from $f(y)$, the marginal distribution of $Y$.
+  2. For each $Y_i$, generate a single $X_i$ from $f(x \mid y)$, the conditional distribution of $X$ given $Y$.
+
+The resulting pairs will have the desired joint distribution.  Further, the column of $X$'s will behave according to the density $f(x)$, the marginal distribution of $X$.
+:::
+
+The Law of Large Numbers guarantees that we can obtain approximations of Bayesian estimators; further, it guarantees these approximations can be made arbitrarily good by choosing a large enough sample size $m$.  Of course, in practice we will specify the value of $m$; and, since MC Integration relies on random processes, it is reasonable to ask how good the resulting approximation is.  Similarly, it is natural to ask how many random samples are needed for an approximation with a specific amount of precision.  This is addressed via a version of the Central Limit Theorem.
+
+:::{#thm-clt}
+## Central Limit Theorem
+Let $X_1, X_2, \dotsc, X_m$ be independent and identically distributed random variables.  Consider a real-valued function $g$ such that $E\left[g(X)\right]$ and $Var\left[g(X)\right]$ exist.  Then, we have that the quantity
+
+$$\frac{\sqrt{m} \left[m^{-1} \sum_{i=1}^{m} g\left(X_i\right) - E\left[g(X)\right]\right]}{\sqrt{\widehat{Var}\left[g(X)\right]}}$$
+    
+behaves like a standard normal random variable as $m \rightarrow \infty$.
+:::
+
+The Central Limit Theorem provides a way of quantifying the error in the Monte Carlo approximation.
+
+:::{#def-mc-error}
+## Monte Carlo Error
+Also called the standard error for an approximation of the form $m^{-1} \sum\limits_{k=1}^{m} g\left(X_k\right)$, the MC error is given by
+    
+$$\sqrt{\frac{1}{m(m-1)} \sum_{k=1}^{m} \left[g\left(X_k\right) - \frac{1}{m} \sum_{j=1}^{m} g\left(X_j\right)\right]^2}$$
+
+which is the sample standard deviation of the generated variates divided by the square root of the number of replications.
+:::
+
+
+We close this chapter by revisiting @exm-csec-point-estimate; instead of an analytical solution, we apply the techniques discussed in this chapter to provide a numeric solution to estimating the unknown parameter. 
+
+:::{#exm-csec-mc-integration}
+## C-section Deliveries Continued
+@exm-csec introduced a study, a component of which includes estimating the probability of a mother undergoing a C-section delivery at a particular hospital.  
+
+@exm-csec-posterior found the posterior distribution to be
+
+$$\theta \mid \bm{x} \sim Beta\left(n + a, n\bar{x} + b\right)$$
+
+where $a = 17, b = 39, n = 15$ and $n\bar{x} = 33$ given the observed data.  
+@exm-csec-point-estimate showed that the posterior mean, estimating the rate of C-sections at the hospital given the observed data, is given by 0.308.  First, use MC Integration to compute this estimate, and then estimate the _odds_ of a C-section at the hospital given the observed data.
+:::
+
+:::{.solution}
+The posterior mean is given by
+
+$$E\left(\theta \mid \bm{x}\right) = \int \theta \pi(\theta \mid \bm{x}) d\theta.$$
+
+Now, as seen in @exm-csec-point-estimate, there is a closed-form expression for this quantity.  However, here, we rely on MC Integration technique.  The following pseudo-code illustrates the process:
+
+```
+let m = 10000;
+
+for i from 1 to m do;
+  x[i] = random_beta(shape1 = (15 + 17), shape2 = (33 + 39));
+end;
+  
+xbar = mean(x[1:m]);
+```
+
+The quantity `xbar` is an estimate of the posterior mean.  This code requires we have access to a function `random_beta()` which generates a (pseudo) random variate from a Beta distribution with specified shape parameters.  Given a function `standard_deviation()` which computes the sample standard deviation of a vector of values, we can compute the MC error in the approximation with
+
+```
+MCerrorx = sqrt(standard_deviation(x[1:m]) / m);
+```
+
+```{r}
+#| label: mc-integration
+#| echo: false
+
+set.seed(20231022)
+m <- 10000
+
+x <- rbeta(m, shape1 = (15 + 17), shape2 = (33 + 39))
+
+xbar <- mean(x)
+MCerrorx <- sqrt(sd(x) / m)
+```
+
+
+One implementation of this algorithm gave an estimate of `r round(xbar, 3)` with an MC error of `r round(MCerrorx, 4)`.  While this computation simply illustrated the process, the next is computation greatly simplifies our burden of work.
+
+We now consider estimating the odds of a C-section at this hospital, given the data.  The odds of an event with rate $\theta$ are defined as $\theta / (1 - \theta)$.  Appealing to @def-expectation, the posterior mean of the odds is then 
+
+$$E\left[\frac{\theta}{1 - \theta} \mid \bm{x}\right] = \int \frac{\theta}{1-\theta} \pi(\theta \mid \bm{x}) d\theta.$$
+
+A closed-form solution for this integral is not readily available; however, a slight modification of our previous pseudo-code allows us to numerically compute this integral:
+
+```
+let m = 10000;
+
+for i from 1 to m do;
+  x[i] = random_beta(shape1 = (15 + 17), shape2 = (33 + 39));
+  y[i] = x[i] / (1 - x[i]);
+end;
+  
+ybar = mean(y[1:m]);
+MCerrory = sqrt(standard_deviation(y[1:m] / m));
+```
+
+```{r}
+#| label: mc-integration-odds
+#| echo: false
+
+y <- x / (1 - x)
+
+ybar <- mean(y)
+MCerrory <- sqrt(sd(y) / m)
+```
+
+The quantity `ybar` is an estimate of the posterior mean for the odds of interest.  One implementation of this algorithm gave an estimate of `r round(ybar, 3)` with an MC error of `r round(MCerrory, 4)`.
+:::
+
+:::{.callout-tip}
+## Big Idea
+Given a large random sample from the posterior distribution, we approximate posterior quantities of interest using the corresponding sample statistic.
+:::

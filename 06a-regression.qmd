@@ -1,0 +1,5 @@
+# Unit VI: Introduction to Regression Modeling {-}
+
+The heart of this text (Unit III) introduced the fundamentals of the Bayesian framework for performing inference.  We then allowed the distribution of the response to vary across a finite number of groups by allowing the unknown parameters that govern the likelihood to potentially differ for each group (Unit IV).  We now consider those unknown parameters that govern the distribution of the response to depend on one or more predictors through some functional form.  
+
+This unit provides a brief overview of considerations for such "regression" models.  We take a very general approach, considering both quantitative and categorical response variables, quantitative and categorical predictors, and various functional forms for how these predictors impact the parameters governing the likelihood.

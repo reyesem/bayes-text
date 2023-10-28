@@ -1,0 +1,8 @@
+"0","#| label: examine-weights"
+"0",""
+"0","ggplot(data = nsduh$variables) +"
+"0","  aes(x = ANALWT_C) +"
+"0","  geom_histogram(fill = 'grey75', color = 'black', binwidth = 5000, "
+"0","                 boundary = 0) +"
+"0","  labs(y = 'Number of Observations',"
+"0","       x = 'Survey Analysis Weights')"

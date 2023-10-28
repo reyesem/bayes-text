@@ -1,0 +1,56 @@
+# Default Priors in Regression Models {#sec-reg-priors}
+
+{{< include _setupcode.qmd >}}
+
+As the number of predictors we take into account grows, the number of unknown parameters governing the distribution of the response grows.  Ideally, the prior distribution for each parameter would be elicited from the beliefs of discipline experts.  However, with so many parameters, it can be difficult to elicit enough information from experts to form a joint prior distribution across all parameters.  With so many parameters, there is often a demand for what to do in "no information" settings.
+
+A popular approach at one time was to use a "spike and slab" prior that places a point mass at 0 mixed with a relatively flat distribution on the real line.  For example, the prior
+
+$$\pi\left(\beta_j\right) = 0.5 \delta\left(\beta_j - 0\right) + 0.5 \frac{1}{1000 \sqrt{2 \pi}} \exp\left\{-\frac{1}{1000^2} \left(\beta_j - 0 \right)^2\right\}$$
+
+mixes a point mass at 0 (with probability 0.5) with a Normal distribution centered at 0 with a standard deviation of 1000 (with probability 0.5).  The large variance within the Normal distribution component of the prior distribution spreads the mass thinly across the real line.  
+
+These priors were once popular because they mixed the typical null distribution $\left(\beta_j = 0\right)$ with a vague prior that allowed the parameter to take nearly any value.  However, there have been some recent recommendations against such priors.
+
+The authors of the Stan programming language (which implements the Hamiltonian Monte Carlo approach) make the following suggestions regarding default priors.
+
+  1. Do not use vague priors.
+  2. Flat, bounded, priors are helpful when you have some idea of the range.
+  3. To conduct an analysis that is robust to outliers, use a Cauchy distribution for location parameters and a Half-Cauchy for scale parameters.
+  4. Given enough data, it is possible to use flat priors for default or sensitivity analyses.
+
+The first suggestion comes from the idea that vague priors put a lot of weight on values we often do not believe are reasonable.  However, others argue that vague priors are safer than unbounded flat priors because each puts weight on unreasonable values, but unbounded flat priors run the risk of producing an improper posterior distribution.  
+
+The second suggestion really highlights that often we have _some_ information.  If really pressed, we are often able to at least suggest unreasonable values for a parameter --- an upper or lower bound, for example.  This then suggests the possibility of a flat prior over a closed interval.
+
+The Cauchy distribution is a bell-shaped distribution similar to a Normal distribution.  However, while it is unimodal (with mode 0), it does not have a finite mean.  Essentially, the distribution is so variable that it has no moments.  This acts similarly to the idea behind a vague prior, placing most mass in a reasonable range (near 0), but still having a mass that extends out in both directions.  A Half-Cauchy distribution limits the support to the positive real line.
+
+A sensitivity analysis allows us to see how dependent our results are on the choice of prior.  If our results would change dramatically depending on the choice of prior, that at a minimum, warrants a discussion.
+
+:::{#exm-therapy-prior}
+## Rehabilitation Therapy Continued
+@exm-therapy described a study to investigate recovery time among patients who have undergone a corrective knee surgery.  In @exm-therapy-likelihood-full, we developed a model for the distribution of the response given the age and prior activity level of the patient:
+
+$$(\text{Recovery Time})_i \mid (\mathbf{Predictors})_i, \bs{\beta} \ind Exp\left(\theta_i\right)$$
+
+where $\theta_i$, the scale term, will depend on the age and prior activity level of the patient, through the function
+
+$$\theta_i = \beta_0 + \beta_1 (\text{Age})_i + \beta_2 (\text{Moderate})_i + \beta_3 (\text{High})_i,$$
+
+where
+
+$$
+\begin{aligned}
+  (\text{Moderate})_i 
+    &= \begin{cases} 1 & \text{if i-th patient has a moderate amount of activity prior to surgery} \\ 0 & \text{otherwise} \end{cases} \\
+  (\text{High})_i
+    &= \begin{cases} 1 & \text{if i-th patient has a high amount of activity prior to surgery} \\ 0 & \text{otherwise}. \end{cases}
+\end{aligned}
+$$
+
+Specify reasonable default priors for each of the unknown parameters.
+:::
+
+:::{.solution}
+As discussed in @exm-therapy-likelihood, the mean response for the Exponential distribution should be positive.  One way to ensure a positive mean response is to ensure each parameter is positive.  Therefore, a reasonable default prior could be a Half-Cauchy distribution.
+:::

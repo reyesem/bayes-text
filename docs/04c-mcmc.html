@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Bayesian Data Analysis - 18&nbsp; Markov Chain Monte Carlo (MCMC)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04d-mcmc-assessment.html" rel="next">
+<link href="./04b-mc-integration.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="mystyles.css">
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04a-computation.html">Unit IV: Numerical Approaches to Bayesian Computations</a></li><li class="breadcrumb-item"><a href="./04c-mcmc.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Markov Chain Monte Carlo (MCMC)</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Bayesian Data Analysis</a> 
+        <div class="sidebar-tools-main">
+    <a href="./ma483-text.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./01a-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit I: Essential Probability</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01b-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Essential Probability</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01c-randomvariables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Random Variables and Distributions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./02a-language.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit II: Language of Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02b-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Statistical Process</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02c-casedeepwater.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Case Study: Health Effects of the Deepwater Horizon Oil Spill</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02d-questions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Asking the Right Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02e-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Gathering the Evidence (Data Collection)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02f-summaries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Presenting the Evidence (Summarizing Data)</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./03a-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit III: Fundamentals of Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03b-bayesrule.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bayes Rule</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03c-modelingsamples.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Modeling Samples</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03d-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Quantifying/Modeling Prior Information</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03e-posteriors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Updating Prior Beliefs (Posterior Distributions)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03f-point-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Point Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03g-interval-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Interval Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03h-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Prediction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03i-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03j-constructing-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Constructing Prior Distributions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./04a-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit IV: Numerical Approaches to Bayesian Computations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04b-mc-integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Monte Carlo Integration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04c-mcmc.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Markov Chain Monte Carlo (MCMC)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04d-mcmc-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Assessing MCMC Samples</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./05a-comparing-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit V: Hierarchical Models for Comparing Groups</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05b-study-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Elements of Good Study Design</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05c-independent-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Considerations when Comparing Independent Groups</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05d-dependent-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Considerations when Comparing Related Groups</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./06a-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit VI: Introduction to Regression Modeling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06b-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Regression Models for a Quantitative Response</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06c-reg-extensions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Extensions to the Linear Model</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06d-reg-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Default Priors in Regression Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06e-qr-factorization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">QR Factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06f-reg-conditions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Assessment for Regression Models for the Mean</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06g-categorical-reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Regression Models for Categorical Responses</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./app-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#hamiltonian-monte-carlo" id="toc-hamiltonian-monte-carlo" class="nav-link active" data-scroll-target="#hamiltonian-monte-carlo"><span class="header-section-number">18.1</span> Hamiltonian Monte Carlo</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-mcmc" class="quarto-section-identifier"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Markov Chain Monte Carlo (MCMC)</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>The previous chapter laid the foundation for Bayesian computations: given a random sample from the posterior distribution, we can approximate any Bayesian estimator, and the level of approximation is only limited by the size of the sample we can take. When the posterior distribution has the form of a known distribution, there are often built-in functions for obtaining a (pseudo) random sample. The majority of applications, however, involve posterior distributions which cannot be derived analytically. In such cases, Markov Chain Monte Carlo (MCMC) techniques are used to sample from the posterior distribution. Once we have a sample from the posterior distribution, we apply the MC Integration techniques from the previous chapter for computing estimates. In this chapter, we give a brief overview of MCMC techniques.</p>
+<p>The technical details of MCMC can be overwhelming; we begin by discussing the conceptual goal of the algorithm, and we do that through <a href="#exm-mcmc-concepts">Example&nbsp;<span>18.1</span></a>.</p>
+<div id="exm-mcmc-concepts" class="theorem example">
+<p><span class="theorem-title"><strong>Example 18.1 (Relative Wealth (MCMC Concepts)) </strong></span>Suppose you are attending a large gathering of your relatives. Given your current status as a student (without no income), you would like to network with these relatives in hopes that they will write you into their will, ensuring you a sizable inheritance. Naturally, you would like to be strategic about how much time you spend with each person, dividing your time with each person proportionally according to their wealth (spend more time with wealthier individuals). However, you face a couple of problems.</p>
+<ul>
+<li>Problem 1: you are uncertain about how many people are actually attending the party.<br>
+</li>
+<li>Problem 2: you have no way of determining the wealth of each person.</li>
+</ul>
+<p>However, while no one is willing to share their actual wealth, each person is willing to share a bit of information with you. If you show interest in speaking with them, the individual will let you know their wealth relative to that of the person you are currently speaking with (“I am half as rich as the person you are speaking with,” for example).</p>
+<p>We want an algorithm for determining who to speak with, and for how long to speak with them.</p>
+</div>
+<p>While <a href="#exm-mcmc-concepts">Example&nbsp;<span>18.1</span></a> is a toy problem, it illustrates the obstacles we are trying to overcome with MCMC methods. We want to take a sample from the posterior distribution, but we do not have the form of the posterior distribution. Instead, we only know the kernel:</p>
+<p><span class="math display">\[\pi(\theta \mid \mathbf{y}) \propto f(\mathbf{y} \mid \theta) \pi(\theta).\]</span></p>
+<p>The first “problem” in <a href="#exm-mcmc-concepts">Example&nbsp;<span>18.1</span></a> reflects our uncertainty about where we should focus our attention within the posterior. We have a sense of the support of the posterior, but there may be large areas of the posterior which have essentially probability 0 of occurring. The second “problem” is that we do not have the value of the posterior; instead, we are only able to compute the posterior up to some scalar constant. Therefore, while we are not able to compute the value of the posterior, we can accurately determine the ratio of the posterior between two points. Observe that</p>
+<p><span class="math display">\[\pi(\theta \mid \mathbf{y}) = \frac{f(\mathbf{y} \mid \theta) \pi(\theta)}{m(\mathbf{y})},\]</span></p>
+<p>where <span class="math inline">\(m(\mathbf{y})\)</span> represents the prior predictive distribution (see <a href="03h-prediction.html#def-prior-predictive-distribution">Definition&nbsp;<span>14.1</span></a>). Now, we have that the ratio of the posterior evaluated at <span class="math inline">\(\theta = a\)</span>, relative to the posterior evaluated at <span class="math inline">\(\theta = b\)</span> is given by</p>
+<p><span class="math display">\[
+\begin{aligned}
+  \frac{\pi(\theta = a \mid \mathbf{y})}{\pi(\theta = b \mid \mathbf{y})}
+    &amp;= \frac{(1/m(\mathbf{y})) f(\mathbf{y} \mid \theta = a) \pi(\theta = a)}{(1/m(\mathbf{y})) f(\mathbf{y} \mid \theta = b)\pi(\theta b)} \\
+    &amp;= \frac{f(\mathbf{y} \mid \theta = a) \pi(\theta = a)}{f(\mathbf{y} \mid \theta = b)\pi(\theta = b)}.
+\end{aligned}
+\]</span></p>
+<p>That is, the ratio of the posterior evaluated at two points can be determined using only the kernel of the distribution. We now consider an algorithm for talking to your relatives that addresses <a href="#exm-mcmc-concepts">Example&nbsp;<span>18.1</span></a>.</p>
+<div class="solution proof">
+<p><span class="proof-title"><em>Solution</em>. </span>Consider the following scheme. You randomly choose a person to begin speaking with (your “partner”). After a fixed period of time, you will flip a coin. If the coin is “heads up,” you will consider speaking with the person to your partner’s right; if the coin is “tails up,” you will consider speaking with the person to your partner’s left. This determines your “candidate.”</p>
+<p>You ask the candidate about their wealth relative to your current partner. If your candidate is wealthier than your partner, you will definitely move to them and make them your new partner. If your candidate is less wealthy than your partner, however, you will only move to them with a probability equivalent to the candidate’s wealth relative to your current partner’s. That is, if the candidate is half as wealthy as your current partner, you will move to the candidate with probability 0.5.</p>
+<p>You then repeat this process many times.</p>
+</div>
+<p>This process summarizes the idea behind MCMC methods. We generate a candidate value of the parameter; if the value of the posterior at the candidate value is higher than our current position, then we choose to move to the candidate point. Otherwise, we move to the candidate point with a probability equal to the ratio of the posterior for the candidate relative to our current position. We move through the parameter space in this fashion until we have generated a large sample from the posterior (say 3000 replicates).</p>
+<p>The above thought exercise illustrates one of the simplest algorithms for generating from an unknown density, known as the Metropolis Algorithm. While in practice this algorithm is rarely implemented directly, it forms the basis of several more complex algorithms, and it illustrates the basic properties of all MCMC methods.</p>
+<div id="def-metropolis-algorithm" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 18.1 (Metropolis Algorithm) </strong></span>Suppose we want to generate random variates from the density <span class="math inline">\(\pi(\theta \mid \mathbf{y})\)</span>. We perform the following steps:</p>
+<ol type="1">
+<li>Generate an initial value <span class="math inline">\(\theta^{(0)}\)</span>.<br>
+</li>
+<li>At the <span class="math inline">\(k\)</span>-th step, generate <span class="math inline">\(\theta^*\)</span> (a candidate) according to a symmetric proposal density <span class="math inline">\(q\left(\theta \mid \theta^{(k-1)}\right)\)</span>.<br>
+</li>
+<li>Compute <span class="math inline">\(A\left(\theta^*, \theta^{(k-1)}\right)\)</span> where <span class="math display">\[A\left(\theta^*, \theta^{(k-1)}\right) = \frac{\pi\left(\theta^* \mid \mathbf{y}\right)}{\pi\left(\theta^{(k-1)} \mid \mathbf{y}\right)} = \frac{f\left(\mathbf{y} \mid \theta^*\right) \pi\left(\theta^*\right)}{f\left(\mathbf{y} \mid \theta^{(k-1)}\right) \pi\left(\theta^{(k-1)}\right)}.\]</span></li>
+<li>Generate <span class="math inline">\(U \sim Unif(0,1)\)</span>. If <span class="math inline">\(U \leq A\left(\theta^*, \theta^{(k-1)}\right)\)</span>, then set <span class="math inline">\(\theta^{(k)} = \theta^*\)</span>; else, set <span class="math inline">\(\theta^{(k)} = \theta^{(k-1)}\)</span>.</li>
+<li>Repeat Steps 2-4 <span class="math inline">\(m\)</span> times, for some large <span class="math inline">\(m\)</span>.</li>
+</ol>
+<p>When generating an initial value, <span class="math inline">\(\theta^{(0)}\)</span>, we could choose <span class="math inline">\(\theta^{(0)} \sim \pi(\theta)\)</span> if the prior is easy to generate from. While it is common to choose <span class="math inline">\(q(\cdot)\)</span> to be a Normal distribution with mean <span class="math inline">\(\theta^{(k-1)}\)</span>, it is not a requirement to do so; when a Normal distribution is used, it can be difficult to determine a reasonable variance (too large, and you drift too far away; too small, and you do not move at all).</p>
+</div>
+<p>The Metropolis Algorithm is typically run several thousand times, resulting in what is known as a Markov Chain.</p>
+<div id="def-markov-chain" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 18.2 (Markov Chain) </strong></span>A sequence of random vectors <span class="math inline">\(\theta^{(0)}, \theta^{(1)}, \theta^{(2)}, \dotsc, \theta^{(n)}\)</span> is a Markov Chain with stationary transition probabilities if for any set <span class="math inline">\(A\)</span> and any <span class="math inline">\(k \leq n\)</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+  Pr\left(\theta^{(k)} \in A \mid \theta^{(1)}, \theta^{(2)}, \dotsc, \theta^{(k-1)}\right)
+    &amp;= Pr\left(\theta^{(k)} \in A \mid \theta^{(k-1)}\right) \\
+    &amp;= \int_{A} q\left(\theta^{(k)} \mid \theta^{(k-1)}\right) d\theta^{(k)}
+\end{aligned}
+\]</span></p>
+<p>where <span class="math inline">\(q\)</span> is called the transition kernel.</p>
+</div>
+<p>In general, Markov chains are not required to have stationary transition probabilities, but it is a nice simplifying assumption that is applied in Bayesian computing methods. Markov chains are a topic of interest in and of themselves in probability theory and are beyond the scope of this text. We primarily focus on the fact that the probability that a value is in some region depends <em>only</em> on the previous state; the remaining “history” (previous states in the chain) is unimportant.</p>
+<p>The Markov Chain is essentially a sample; of course, for it to be useful, we need to establish that the chain is also representative of the appropriate target distribution. That is, we need to know the Markov Chain represents the posterior distribution. This target distribution has a name in Markov Chain literature — the “stationary distribution.”</p>
+<div id="def-stationary-distribution" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 18.3 (Stationary Distribution) </strong></span>Let <span class="math inline">\(\theta^{(0)}, \theta^{(1)}, \theta^{(2)}, \dotsc, \theta^{(n)}\)</span> be a Markov Chain. The stationary distribution of the Markov Chain is the distribution <span class="math inline">\(p(\theta)\)</span> such that</p>
+<p><span class="math display">\[Pr\left(\theta^{(k)} \in A\right) = \int_{A} p(\theta) d\theta.\]</span></p>
+</div>
+<p>The stationary distribution is where the Markov Chain settles down so that the probability that any variate is in some region is computed using that same distribution <span class="math inline">\(p\)</span> (as opposed to the transition kernel). You can think of it as the limit of the transition kernel as <span class="math inline">\(k\)</span> gets large.</p>
+<p>The idea is to choose a proposal density <span class="math inline">\(q\)</span> in the Metropolis Algorithm such that the stationary distribution of the resulting Markov Chain, if one exists, will be the posterior distribution of interest. So, we want to pick a proposal density <span class="math inline">\(q\)</span> that is easy to generate from, is symmetric, and so that eventually, the values we are generating behave as if they were drawn from the posterior distribution. The machinery needed to prove such results is beyond the scope of our text, but it can be shown that the Metropolis Algorithm produces a Markov Chain for which the stationary distribution is the same as the posterior distribution, provided that the proposal density is symmetric. That is, as <span class="math inline">\(k\)</span> increases, the values generated by this algorithm behave as if they were drawn from the posterior distribution. More, we can show that this is true regardless of the choice of the starting value <span class="math inline">\(\theta^{(0)}\)</span>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>It can be shown that the the Metropolis Algorithm has the posterior distribution as the stationary distribution of the Markov Chain, but the Metropolis Algorithm is not always the most efficient algorithm for generating from the posterior distribution. In practice, other algorithms, such as the Gibbs sampler or Hamiltonian Monte Carlo, improve on the efficiency by implementing modifications to the above Metropolis Algorithm.</p>
+</div>
+</div>
+<p>We now have a way of generating values which have properties similar to random variates drawn from the posterior distribution. The language here is chosen with care because, as always, there is a catch: <strong>the values generated in the Markov Chain are identically distributed, but are not independent.</strong></p>
+<p>In practice, analysts often state that they have obtained a random sample from the posterior using MCMC methods; and, we can often proceed as if that were true. However, when we use MCMC methods, the resulting sample is not truly a “random sample” in the sense of being IID. The points are identically distributed, but since each variate in the sample was generated based on the value of the previous variate, there is a dependence between the variates. Fortunately, this dependence between values generated consecutively (known as autocorrelation) is often negligible in practice.</p>
+<p>The real issue is that the theory introduced in <a href="04b-mc-integration.html"><span>Chapter&nbsp;17</span></a> relied on having a random sample (IID variates). Therefore, the fact that the Markov Chain generated by the Metropolis Algorithm does not result in independent observations seems to imply that we are unable to rely on MC Integration. Fortunately, however, there is a Law of Large Numbers-type result for Markov Chains which says</p>
+<p><span class="math display">\[\lim\limits_{m \rightarrow \infty} \frac{1}{m} \sum_{k=1}^{m} g\left(\theta^{(k)}\right) = \int g(\theta) p(\theta) d\theta\]</span></p>
+<p>where <span class="math inline">\(g(\cdot)\)</span> is some real-valued function and <span class="math inline">\(p(\theta)\)</span> is the stationary distribution of the Markov Chain, if it exists. This result says that even though the points are related, as we take a large number of them, we can approximate integrals (therefore, Bayesian estimators) using sample averages. That is, we can apply MC Integration techniques to Markov Chains.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Big Idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For a sufficiently large number of replications, the Markov Chain resulting from an MCMC algorithm will behave as a random sample from the posterior distribution.</p>
+</div>
+</div>
+<section id="hamiltonian-monte-carlo" class="level2" data-number="18.1">
+<h2 data-number="18.1" class="anchored" data-anchor-id="hamiltonian-monte-carlo"><span class="header-section-number">18.1</span> Hamiltonian Monte Carlo</h2>
+<p>The trick to MCMC methods is to choose a transition kernel that is efficient and can handle the myriad of situations encountered in practice. The Metropolis Algorithm, while simplistic, is not very efficient, and can be quite difficult to implement when the dimension of the parameter vector increases. A commonly implemented alternative is known as the Gibbs sampler. This is implemented in the popular Bayesian software packages <a href="https://www.mrc-bsu.cam.ac.uk/software/bugs/">BUGS</a> (Bayesian inference Using Gibbs Sampling) and <a href="https://mcmc-jags.sourceforge.io/">JAGS</a> (Just Another Gibbs Sampler). BUGS is a standalone software package while JAGS is implemented in other computing languages (like R and Python). These software packages provide a myriad of algorithms based on the Gibbs sampler which address hierarchical models in a nice way. However, in some complex models, these algorithms can be inefficient or fail to produce variates from the posterior. <a href="https://mc-stan.org/">Stan</a> implements a Hamiltonian Monte Carlo (HMC) algorithm which can succeed in these situations. While the details of the algorithm are beyond the scope of this text, we discuss the ways in which HMC improves upon the Metropolis Algorithm discussed above.</p>
+<p>The Metropolis Algorithm can be summarized in the following two statements:</p>
+<ul>
+<li>Choose the candidate point using a symmetric proposal distribution centered on the current point.</li>
+<li>Favor points with a larger corresponding posterior density, moving to candidate points with lower posterior density probabilistically.</li>
+</ul>
+<p>The key distinction between the Metropolis Algorithm and HMC is to allow the proposal distribution to be dependent upon our current location.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Big Idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>HMC uses proposal distributions which favor moving toward the posterior mode.</p>
+</div>
+</div>
+<p>The idea is illustrated in <a href="#fig-mcmc-p1">Figure&nbsp;<span>18.1</span></a>, created by John Kruschke <span class="citation" data-cites="Kruschke2015">(<a href="references.html#ref-Kruschke2015" role="doc-biblioref">Kruschke 2015</a>)</span>, which shows how proposals are generated for two different initial values. Note, the end result in this graphic is not a sample from the posterior but the distribution of potential next steps.</p>
+<div id="fig-mcmc-p1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/Kruschke-Fig1.jpg" class="img-fluid figure-img" alt="Eight panels laid out in four rows, each row illustrating the key steps in the HMC algorithm."></p>
+<figcaption class="figure-caption">Figure&nbsp;18.1: Examples of Hamiltonian Monte Carlo proposal distributions. Two columns show two different current parameter values, marked by a large dot. The first row shows the posterior distribution. The second row shows the potential energy, with a random impulse given to the dot. The third row shows trajectories, which are the theta value (x-axis) as a function of time (y-axis marked Steps*Eps). The fourth row shows histograms of the proposals.</figcaption>
+</figure>
+</div>
+<p>To illustrate how this works, consider two different current positions within a posterior distribution. The Metropolis Algorithm would simply say to generate proposals which are symmetric about the current position. HMC generates proposals that are closer to the posterior mode (as evidenced by the bottom part of the figure where the majority of proposals are near the mode). In order to determine where to move from the current position, the HMC algorithm considers the <em>potential</em> of the position, defined through the negative log-density. The potential gives an idea of how far we might want to travel (the potential of the position to change).</p>
+<div id="def-potential" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 18.4 (Potential) </strong></span>The potential of a value <span class="math inline">\(\theta\)</span> is the negative logarithm of the posterior evaluated at <span class="math inline">\(\theta\)</span>. In practice, we need only know the potential up to a constant. That is, it suffices to define the potential as</p>
+<p><span class="math display">\[\text{Potential}(\theta) = -\log\left[f(\mathbf{y} \mid \theta) \pi(\theta)\right].\]</span></p>
+</div>
+<p>While we have described the potential as a value, since it exists for all <span class="math inline">\(\theta\)</span> in the support, we can think of the potential as a function (row 2 of <a href="#fig-mcmc-p1">Figure&nbsp;<span>18.1</span></a>). Now, imagine the current position is a ball on the potential; the proposed position is determined by flicking the ball randomly. This random “flick” is done by selecting a random variable from a Standard Normal distribution, which determines both the magnitude and direction of the flick (negative values move the ball to the left, and positive values move the ball to the right). We then watch the ball roll around for a while. Wherever the ball stops is the proposed position. This is illustrated in the third row of graphics in <a href="#fig-mcmc-p1">Figure&nbsp;<span>18.1</span></a> that show how the ball moves over time to the proposed position.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The sum of potential and kinetic energy is known as the Hamiltonian (hence the name of this procedure). The total energy should be conserved at each point in the algorithm.</p>
+</div>
+</div>
+<p>As the ball rolls around on the potential, it will naturally be drawn to lower points on this surface. That is, candidate points will tend to be drawn from regions with lower potential, corresponding to regions with a higher posterior density. Notice that when the current position is near the posterior mode, the potential positions are nearly symmetric about the current location as in the Metropolis Algorithm. But, if the current position is far from the posterior mode, the potential positions are drawn from regions closer to the posterior mode and the potential positions are far from the current position.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Big Idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The HMC algorithm generates proposals which tend to have lower potential.</p>
+</div>
+</div>
+<p>We emphasize that these are just <em>candidate</em> positions. Once a candidate position is identified, we must decide whether to move there or remain in the current position, just as we do in the Metropolis Algorithm.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Decision Rule for HMC:
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Generate <span class="math inline">\(U \sim Unif(0,1)\)</span> and <span class="math inline">\(A\left(\theta^*, \theta^{(k-1)}\right)\)</span> where</p>
+<p><span class="math display">\[A\left(\theta^*, \theta^{(k-1)}\right) = \frac{f\left(\mathbf{y} \mid \theta^*\right) \pi\left(\theta^*\right) \omega\left(\theta^*\right)}{f\left(\mathbf{y} \mid \theta^{(k-1)}\right) \pi\left(\theta^{(k-1)}\right) \omega\left(\theta^{(k-1)}\right)}\]</span></p>
+<p>and <span class="math inline">\(\omega(\cdot)\)</span> is the momentum. If <span class="math inline">\(U \leq A\left(\theta^*, \theta^{(k-1)}\right)\)</span>, then we move to the new position; otherwise, we remain in the same position.</p>
+</div>
+</div>
+<p>The momentum can be thought of as how much speed the ball has when you reach the candidate position (remember, we stop the ball not when it comes to rest but after some fixed amount of time). Recall that we apply a random momentum to the current location of the ball. The aspect we want to emphasize here is that the decision rule is quite similar to the Metropolis Algorithm.</p>
+<p>We have described this process as letting the “ball roll around” for some fixed set of time. In practice, we emulate this by taking some predefined number of steps of a certain size based on the gradient (much like numeric function minimization). Both the step size and number of steps require some tuning. The step size is tuned to balance how far away from the current position we move and the degree of approximation. If we take small steps, we approximate the curve quite nicely, but we do not get anywhere. If we take large steps, we move away from our current position, but the approximation suffers. The total duration (the number of steps taken) is tuned to ensure we do not overshoot or make a u-turn. If we let the ball roll for too long, it could overshoot the posterior mode by a large degree; or, we may end up stopping the ball when it has rolled back to where it started. <a href="#fig-mcmc-p2">Figure&nbsp;<span>18.2</span></a>, created by John Kruschke <span class="citation" data-cites="Kruschke2015">(<a href="references.html#ref-Kruschke2015" role="doc-biblioref">Kruschke 2015</a>)</span>, illustrates the impact of allowing the “time” (number of steps and length of step size) to be too large; notice the difference in the distribution of candidate points in <a href="#fig-mcmc-p2">Figure&nbsp;<span>18.2</span></a> compared to <a href="#fig-mcmc-p1">Figure&nbsp;<span>18.1</span></a>.</p>
+<div id="fig-mcmc-p2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/Kruschke-Fig2.jpg" class="img-fluid figure-img" alt="Eight panels laid out in four rows, each row illustrating the key steps in the HMC algorithm and the impact of step size."></p>
+<figcaption class="figure-caption">Figure&nbsp;18.2: Examples of Hamiltonian Monte Carlo proposal distributions for two different current parameter values, marked by the large dots, in the two columns. For this figure, a large range of random trajectory lengths (Steps*Eps) is sampled.</figcaption>
+</figure>
+</div>
+<p>In addition to these tuning parameters, we must determine the standard deviation of the symmetric distribution used to apply the momentum to the current position. This choice needs to balance variety with accuracy. Too small of a standard deviation (like nudging the ball) means it will not roll far from where it started, and every candidate is essentially the same (leading to a higher likelihood of acceptance/rejection). Too large of a standard deviation, and a high degree of candidates will be rejected. <a href="#fig-mcmc-p3">Figure&nbsp;<span>18.3</span></a>, created by John Kruschke <span class="citation" data-cites="Kruschke2015">(<a href="references.html#ref-Kruschke2015" role="doc-biblioref">Kruschke 2015</a>)</span>, illustrates the impact of standard deviation in the proposal distribution; notice the difference in the distribution of candidate points between the two columns in <a href="#fig-mcmc-p3">Figure&nbsp;<span>18.3</span></a>.</p>
+<div id="fig-mcmc-p3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/Kruschke-Fig3.jpg" class="img-fluid figure-img" alt="Eight panels laid out in four rows, each row illustrating the key steps in the HMC algorithm and impact of standard deviation of proposal density."></p>
+<figcaption class="figure-caption">Figure&nbsp;18.3: Examples of a Hamiltonian Monte Carlo proposal distributions for two different variances of the initial random momentum, indicated in the second row.</figcaption>
+</figure>
+</div>
+<p>Proper tuning ensures that the algorithm is efficient and a majority of the variates are useful in representing the posterior. These are handled internally by the software, but it is important to have an understanding of what is happening in the background.</p>
+<p>With MCMC methods, we can address a multitude of more complex problems. We do note the one limitation of Stan is that it does not currently support discrete parameters directly. This is because the HMC algorithm needs a smooth function in order to compute the gradient. Not supporting discrete parameters is not as limiting as it might seem, but it does prohibit automatic model comparison within Stan and eliminates the ability to put a point mass in the prior distribution.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While you could write custom implementations of the HMC (or any MCMC) algorithm, software like Stan does the hard work for you. However, in order to make use of those tools, you must specify the Bayesian model (the likelihood and the prior) in addition to providing the data. This can require your learning a new “probability language” (as opposed to a computing language) for specifying such models. Some software packages have pre-built functions/interfaces for commonly specified models allowing you to get started more quickly.</p>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
+<div id="ref-Kruschke2015" class="csl-entry" role="listitem">
+Kruschke, John K. 2015. <em>Doing Bayesian Data Analysis: A Tutorial with r, JAGS, and Stan</em>. 2nd ed. Elsevier.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./04b-mc-integration.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Monte Carlo Integration</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04d-mcmc-assessment.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Assessing MCMC Samples</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

@@ -1,0 +1,18 @@
+"0","
+
+
+data {
+  int<lower = 0> N;
+  int<lower = 0> times[N];
+}
+parameters {
+  real<lower = 0, upper = 1> theta;
+}
+model {
+  theta ~ beta(17, 39);
+  
+  for (i in 1:N) {
+    target += log(theta) + (times[i]*log(1 - theta));
+  }
+}
+"

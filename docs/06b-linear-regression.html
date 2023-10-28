@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Bayesian Data Analysis - 23&nbsp; Regression Models for a Quantitative Response</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./06c-reg-extensions.html" rel="next">
+<link href="./06a-regression.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="mystyles.css">
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./06a-regression.html">Unit VI: Introduction to Regression Modeling</a></li><li class="breadcrumb-item"><a href="./06b-linear-regression.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Regression Models for a Quantitative Response</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Bayesian Data Analysis</a> 
+        <div class="sidebar-tools-main">
+    <a href="./ma483-text.pdf" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./01a-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit I: Essential Probability</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01b-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Essential Probability</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01c-randomvariables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Random Variables and Distributions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./02a-language.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit II: Language of Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02b-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Statistical Process</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02c-casedeepwater.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Case Study: Health Effects of the Deepwater Horizon Oil Spill</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02d-questions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Asking the Right Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02e-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Gathering the Evidence (Data Collection)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02f-summaries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Presenting the Evidence (Summarizing Data)</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./03a-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit III: Fundamentals of Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03b-bayesrule.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bayes Rule</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03c-modelingsamples.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Modeling Samples</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03d-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Quantifying/Modeling Prior Information</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03e-posteriors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Updating Prior Beliefs (Posterior Distributions)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03f-point-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Point Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03g-interval-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Interval Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03h-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Prediction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03i-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03j-constructing-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Constructing Prior Distributions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./04a-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit IV: Numerical Approaches to Bayesian Computations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04b-mc-integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Monte Carlo Integration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04c-mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Markov Chain Monte Carlo (MCMC)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04d-mcmc-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Assessing MCMC Samples</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./05a-comparing-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit V: Hierarchical Models for Comparing Groups</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05b-study-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Elements of Good Study Design</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05c-independent-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Considerations when Comparing Independent Groups</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05d-dependent-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Considerations when Comparing Related Groups</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./06a-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit VI: Introduction to Regression Modeling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06b-linear-regression.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Regression Models for a Quantitative Response</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06c-reg-extensions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Extensions to the Linear Model</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06d-reg-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Default Priors in Regression Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06e-qr-factorization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">QR Factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06f-reg-conditions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Assessment for Regression Models for the Mean</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06g-categorical-reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Regression Models for Categorical Responses</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./app-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#developing-a-model" id="toc-developing-a-model" class="nav-link active" data-scroll-target="#developing-a-model"><span class="header-section-number">23.1</span> Developing a Model</a></li>
+  <li><a href="#simple-extensions" id="toc-simple-extensions" class="nav-link" data-scroll-target="#simple-extensions"><span class="header-section-number">23.2</span> Simple Extensions</a></li>
+  <li><a href="#fixed-vs.-random-predictors" id="toc-fixed-vs.-random-predictors" class="nav-link" data-scroll-target="#fixed-vs.-random-predictors"><span class="header-section-number">23.3</span> Fixed vs.&nbsp;Random Predictors</a></li>
+  <li><a href="#interpreting-the-predictors" id="toc-interpreting-the-predictors" class="nav-link" data-scroll-target="#interpreting-the-predictors"><span class="header-section-number">23.4</span> Interpreting the Predictors</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-linear-regression" class="quarto-section-identifier"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Regression Models for a Quantitative Response</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>Recall that continuous random variables are analogous to quantitative variables in a study; similarly, discrete random variables are analogous to categorical (or qualitative) variables in a study. In this chapter, we are interested in allowing the (continuous) distribution of the random variable that represents the response to depend on one or more predictors. Let’s begin with an example to illustrate the range of questions we might ask in such a setting.</p>
+<div id="exm-therapy" class="theorem example">
+<p><span class="theorem-title"><strong>Example 23.1 (Rehabilitation Therapy) </strong></span>Physical therapy is a vital part of the recovery from any surgery, particularly surgery which impacts motor function, such as knee or hip surgery. A researcher at a local rehabilitation center was interested in the recovery time of individuals who have undergone corrective knee surgery. Specifically, the researcher is interested in examining the relationship between the physical fitness (of persons undergoing corrective knee surgery) prior to surgery and the time required in physical therapy until successful rehabilitation (“recovery time”). Patient records in the rehabilitation center were examined, and 24 male subjects ranging in age from 18 to 30 years who had undergone similar corrective knee surgery during the past year were selected for the study. The following information was obtained from the case record of each patient:</p>
+<ul>
+<li>Recovery Time: number of days of physical therapy until the subject has met their physical therapy goals.</li>
+<li>Prior Activity Level: physical fitness status (low, moderate, high) prior to surgery; this is based on a questionnaire asking about the frequency of various physical activity over the course of a typical week.</li>
+<li>Age: age (years, rounded to nearest tenth).</li>
+</ul>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We note that this study has potential bias. The initial question was framed in terms of all patients undergoing corrective knee surgery, but the sample consists of only male patients. Unfortunately, for a number of years, women were highly underrepresented in medical research (with the exception of studies involving cosmetic products), and individuals who do not identify as male or female continue to be underrepresented in medical studies.</p>
+</div>
+</div>
+<p>By all accounts, this is a small study, recording only 3 variables on 24 subjects. Yet, even with only a few variables, there are a myriad of potential questions that require more complex models than we have previously discussed. Consider the following:</p>
+<ul>
+<li>Overall, is the recovery time, on average, linearly related to the age of patients?</li>
+<li>For subjects of the same age, is there a relationship between the recovery time, on average, and the prior activity level of patients?</li>
+<li>Does the relationship between the recovery time, on average, and the age of a patient depend on the patient’s prior activity level?</li>
+<li>Does the variability in the recovery time depend on the age of the patient?</li>
+</ul>
+<p>Any one of these questions could be the focus of a researcher. Notice that each, though, is slightly different. While the first question involves a relationship between a quantitative response and a quantitative variable, the second involves a quantitative response and multiple predictors (one quantitative and one categorical) with a desire to essentially “isolate” the impact of one of the predictors. The third question looks at how the relationship between the response and predictor might be modified by a third variable; and, the fourth looks at a relationship impacting the variability instead of the mean response. Each of these questions require us to move beyond the methods we have previously discussed. And, each of these questions shares a similar structure.</p>
+<p>We might be tempted to force these questions into the “comparison of groups” approach studied previously. To examine the difference in recovery time across age, for example, we might categorize subjects as “in their teens” or “in their 20’s.” However, this approach prevents us from examining smooth trends across age. Such categorizations can also lead to categories with a very small number of subjects, meaning our priors will have undue influence on the results. We will consider an alternative approach.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Big Idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Broadly speaking, there are three types of scientific questions that regression models allow us to address:</p>
+<ul>
+<li>Marginal relationships: captures the “overall” relationship between two variables, ignoring any other contributing factors.</li>
+<li>Adjusted relationships: captures the effect of a variable after “isolating” it from other contributing factors.</li>
+<li>Effect Modification: captures how the effect of one variable on the response is modified by a second contributing factor.</li>
+</ul>
+<p>Of course, regardless of these types of scientific questions we might address, we can also use our model to predict a future observation given a specific set of contributing factors.</p>
+</div>
+</div>
+<section id="developing-a-model" class="level2" data-number="23.1">
+<h2 data-number="23.1" class="anchored" data-anchor-id="developing-a-model"><span class="header-section-number">23.1</span> Developing a Model</h2>
+<p>In many introductory statistics courses, statistical models are typically introduced in the following generic form:</p>
+<p><span class="math display">\[\text{Response} = \text{Signal} + \text{Noise}.\]</span></p>
+<p>The “response” is the variable we would like to explain or predict. The “signal” represents the part of the data generating process we can explain; it is the deterministic portion of the model and is a function of the predictor(s). The “noise” represents the stochastic portion capturing the variability observed beyond what can be explained by the deterministic portion alone. The common starting point for such a model is the simple linear regression model:</p>
+<p><span class="math display">\[(\text{Response})_i = \beta_0 + \beta_1 (\text{Predictor})_i + \varepsilon_i.\]</span></p>
+<p>This model views the deterministic portion of the model as a line. Notice that any two subjects with the same value of the predictor would have the same value for the deterministic portion of the model; however, the two subjects will not necessarily have the same response as the noise <span class="math inline">\(\varepsilon_i\)</span> can differ from one subject to the next. Of course, this model is too vague to be helpful; so, we place additional constraints on the stochastic portion. In particular, we place conditions on the <em>distribution</em> of <span class="math inline">\(\varepsilon_i\)</span>. For example, we might assume that <span class="math inline">\(E\left(\varepsilon_i\right) = 0\)</span> or that the <span class="math inline">\(\varepsilon_i\)</span>’s are identically distributed.</p>
+<p>Notice that this approach, while reasonable, does not align with the approach we have taken thus far in the course. Instead of thinking of the response as a signal plus noise and then placing conditions on the distribution of the noise, we have considered fully specifying the distributional form of the data generating process. That is, we specified the likelihood <span class="math inline">\(f(\mathbf{y} \mid \boldsymbol{\theta})\)</span>. This approach is preferred in the Bayesian perspective (and in the classical perspective in our opinion) because it generalizes more easily and provides a unifying framework for inference. It is within this context of fully specifying the likelihood that we consider developing regression models.</p>
+<div id="def-regression" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 23.1 (Regression) </strong></span>A regression model is one for which the parameter(s) governing the data generating process depends on one or more predictors. “Parametric” regression models do this through specifying a functional form for the dependence of the parameter(s) on the predictor(s).</p>
+</div>
+<p>To illustrate the scope of <a href="#def-regression">Definition&nbsp;<span>23.1</span></a>, let’s consider several potential models we might consider in the Bayesian framework. Consider</p>
+<p><span id="eq-normal-model"><span class="math display">\[(\text{Response})_i \mid \beta_0, \beta_1, \sigma^2 \stackrel{\text{Ind}}{\sim}N\left(\beta_0 + \beta_1 (\text{Predictor})_i, \sigma^2\right). \tag{23.1}\]</span></span></p>
+<p>Notice that <a href="#eq-normal-model">Equation&nbsp;<span>23.1</span></a> allows the <em>mean</em> response to depend on the predictor through the form</p>
+<p><span class="math display">\[\beta_0 + \beta_1 (\text{Predictor})_i.\]</span></p>
+<p>That is, instead of a single mean response <span class="math inline">\(\mu\)</span>, the mean response is determined only after first specifying the value of the predictor. As the mean response differs for each subject, depending on their value of the predictor, the responses are <em>not</em> identically distributed. However, we have retained the assumption that the responses are independent of one another (given the unknown parameters). Further, it is <em>only</em> the mean response that is impacted by the predictor. The variance of the response is not impacted but remains constant across all observations. This model also fully specifies the distributional form of the response — it is a Normal distribution.</p>
+<p>In contrast to <a href="#eq-normal-model">Equation&nbsp;<span>23.1</span></a>, consider</p>
+<p><span id="eq-gamma-model"><span class="math display">\[(\text{Response})_i \mid \alpha, \gamma_0, \gamma_1 \stackrel{\text{Ind}}{\sim}Gamma\left(\alpha (\text{Predictor 1})_i^2, \gamma_0e^{\gamma_1 (\text{Predictor 2})_i}\right), \tag{23.2}\]</span></span></p>
+<p>which says the responses follow a Gamma distribution where the shape parameter depends on “Predictor 1” through a quadratic relationship; and, the rate parameter depends on “Predictor 2” through an exponential function. Again, while the responses are not identically distributed, they remain independent. Both <a href="#eq-normal-model">Equation&nbsp;<span>23.1</span></a> and <a href="#eq-gamma-model">Equation&nbsp;<span>23.2</span></a> extend common distributional models by allowing the parameters to depend on predictors. The model that is appropriate should be driven by the research objectives and discipline expertise.</p>
+<p>To get a sense of how model construction is related to the research objectives, let’s return to <a href="#eq-normal-model">Equation&nbsp;<span>23.1</span></a>. Notice that by replacing the mean with a functional form, we have introduced new parameters into the distribution: <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>. These parameters govern the mean response. As a result, their interpretation is tied to the mean response:</p>
+<ul>
+<li><span class="math inline">\(\beta_0\)</span> represents the mean response when the value of the predictor is 0.</li>
+<li><span class="math inline">\(\beta_1\)</span> represents the change in the mean response when the predictor is increased by 1 unit.</li>
+</ul>
+<p>Notice that the interpretation of the parameters could be related to specific scientific questions. If we are interested in how changes in the predictor relate with changes in the response, we are interested in <span class="math inline">\(\beta_1\)</span>.</p>
+<p>The interpretation of <span class="math inline">\(\alpha\)</span> in <a href="#eq-gamma-model">Equation&nbsp;<span>23.2</span></a> is not as clear. It represents the shape parameter when the first predictor takes a value of 1; since the shape parameter is not directly interpretable in terms of the response (like the mean or variance is), this interpretation is less satisfying. But, we know that <span class="math inline">\(\frac{\alpha}{\gamma_0}\)</span> would represent the average response when the first predictor takes a value of 1 and the second predictor takes a value of 0. That is, through a combination of the parameters, we have some sense of the mean response.</p>
+<p>Of course, there are infinitely many other models we could specify. The distributional family could vary (Normal, Gamma, Beta, a mixture, etc.); the functional form could vary (linear, exponential, sinusoidal, etc.); the parameters impacted could vary (mean, shape, rate, etc.). What is common to each of these potential models is that we specify the distribution of the response allowing key aspects of the distribution to vary as functions of the predictor(s).</p>
+<p>Specifying the distribution of the response is only a portion of the model under the Bayesian framework. Returning to the distributional family specified in <a href="#eq-normal-model">Equation&nbsp;<span>23.1</span></a>, the assumption of independence allows us to easily construct the likelihood, given by</p>
+<p><span class="math display">\[
+\begin{aligned}
+  f\left(\mathbf{Response} \mid \beta_0, \beta_1, \sigma^2\right)
+    &amp;= \prod_{i=1}^{n} f\left((\text{Response})_i \mid \beta_0, \beta_1, \sigma^2\right) \\
+    &amp;= \left(2\pi \sigma^2\right)^{-n/2} \exp\left\{-\frac{1}{2\sigma^2}\sum_{i=1}^{n} \left((\text{Response})_i - \beta_0 - \beta_1 (\text{Predictor})_i\right)^2\right\}.
+\end{aligned}
+\]</span></p>
+<p>We present this to show that the likelihood can quickly become difficult to work with as the complexity of the distributional model grows.</p>
+</section>
+<section id="simple-extensions" class="level2" data-number="23.2">
+<h2 data-number="23.2" class="anchored" data-anchor-id="simple-extensions"><span class="header-section-number">23.2</span> Simple Extensions</h2>
+<p>As previously stated, the distributional model in <a href="#eq-normal-model">Equation&nbsp;<span>23.1</span></a> represents a common model for introducing regression. However, there are two simple extensions that are worth considering. First, we consider the inclusion of multiple predictors. For example, given <span class="math inline">\(p\)</span> predictors, we might posit that</p>
+<p><span id="eq-normal-model-multiple"><span class="math display">\[(\text{Response})_i \mid \boldsymbol{\beta}, \sigma^2 \stackrel{\text{Ind}}{\sim}N\left(\beta_0 + \sum_{j=1}^{p} \beta_j (\text{Predictor } j)_i, \sigma^2\right) \tag{23.3}\]</span></span></p>
+<p>for <span class="math inline">\(j = 1, 2, \dots, p\)</span>, giving a likelihood of</p>
+<p><span class="math display">\[f\left(\mathbf{Response} \mid \boldsymbol{\beta}, \sigma^2\right) = \left(2 \pi \sigma^2\right)^{-n/2} \exp\left\{- \frac{1}{2\sigma^2} \sum_{i=1}^{n} \left((\text{Response})_i - \beta_0 - \sum_{j=1}^{p} \beta_j (\text{Predictor } j)_i\right)^2\right\}.\]</span></p>
+<p>This model allows several predictors to impact the mean response.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While it is common to have the predictors enter the model such that the mean response is linear <em>in the parameters</em>, this is not a requirement. We could easily allow the predictors to impact the mean response through some nonlinear function.</p>
+</div>
+</div>
+<p>Second, nothing requires that the response follow a Normal distribution. For example, we might posit that</p>
+<p><span class="math display">\[(\text{Response})_i = \beta_0 + \beta_1 (\text{Predictor})_i + \varepsilon_i,\]</span></p>
+<p>where <span class="math inline">\(\varepsilon_i \stackrel{\text{IID}}{\sim}t_{\nu}\)</span>. While we have specified this in a “signal plus noise” form, notice that we are simply saying the response can be modeled by a t-distribution which has been shifted to be centered on <span class="math inline">\(\beta_0 + \beta_1 (\text{Predictor})_i\)</span>.</p>
+<p>Both of these extensions are complex from a classical perspective, requiring different machinery to be able to conduct inference. However, from the Bayesian perspective, we have specified a different model, but the process for performing inference remains exactly the same: specify a distribution to capture the prior information (see <a href="06d-reg-priors.html"><span>Chapter&nbsp;25</span></a>) and then compute the posterior distribution (typically using MCMC methods).</p>
+</section>
+<section id="fixed-vs.-random-predictors" class="level2" data-number="23.3">
+<h2 data-number="23.3" class="anchored" data-anchor-id="fixed-vs.-random-predictors"><span class="header-section-number">23.3</span> Fixed vs.&nbsp;Random Predictors</h2>
+<p>You may have noticed that <a href="#eq-normal-model">Equation&nbsp;<span>23.1</span></a> only specified the distribution of the response variable as a function of the predictor; it omitted the distribution of the predictor itself. For a designed experiment in which the values of all predictors are determined in advance by the researchers, the predictors are constants. As such, the notation of <a href="#eq-normal-model">Equation&nbsp;<span>23.1</span></a> is appropriate. However, in many situations, the predictors are not fixed in advanced but observed during the data collection; that is, the predictors can also be viewed as observed values of random variables which vary across individuals in the population. Consider the Rehabilitation example (<a href="#exm-therapy">Example&nbsp;<span>23.1</span></a>) above; the age of each patient is unknown prior to the study. We expect the age to vary across individuals who have undergone knee replacement; therefore, age has a distribution across the population that should be modeled.</p>
+<p>It is common in a regression analysis to <em>condition</em> on the predictors when making inference. Consider <a href="#eq-normal-model">Equation&nbsp;<span>23.1</span></a>; if we believe the predictor is not determined in advance, but we condition on the value of the predictor, then our model would be expressed as</p>
+<p><span id="eq-normal-model-cond"><span class="math display">\[(\text{Response})_i \mid (\text{Predictor})_i, \beta_0, \beta_1, \sigma^2 \stackrel{\text{Ind}}{\sim}N\left(\beta_0 + \beta_1 (\text{Predictor})_i, \sigma^2\right). \tag{23.4}\]</span></span></p>
+<p>The likelihood for this model is equivalent to what we had before; in fact, nothing about our analysis changes. However, conceptually, we are saying that our model applies only after knowing the value of the predictor. As a result, the model does not specify the distribution of the predictor, and all interpretations assume we have access to the predictor prior to making a statement about the response.</p>
+<p>While it is common to condition on the predictors when making inference, it is not a requirement. Including the distribution of the predictors is simply a modeling exercise when developing the likelihood. Since <a href="#eq-normal-model-cond">Equation&nbsp;<span>23.4</span></a> already specifies the conditional distribution of the response given the predictor, adding a statement about the marginal distribution of the predictor leads to a hierarchical model that fully specifies the distribution of all observed variables. For example, we might consider the model</p>
+<p><span id="eq-normal-model-full"><span class="math display">\[
+\begin{aligned}
+  (\text{Response})_i \mid (\text{Predictor})_i, \beta_0, \beta_1, \sigma^2
+    &amp;\stackrel{\text{Ind}}{\sim}N\left(\beta_0 + \beta_1 (\text{Predictor})_i, \sigma^2\right) \\
+  (\text{Predictor}_i \mid \gamma, \eta^2 &amp;\stackrel{\text{IID}}{\sim}N\left(\gamma, \eta^2\right).
+\end{aligned}
+\tag{23.5}\]</span></span></p>
+<p>While <a href="#eq-normal-model-full">Equation&nbsp;<span>23.5</span></a> has the same predictor as in <a href="#eq-normal-model">Equation&nbsp;<span>23.1</span></a>; however, it fully specifies the distribution of all observed variables. The likelihood of the observed data is then</p>
+<p><span class="math display">\[
+\begin{aligned}
+  f\left(\mathbf{Data} \mid \beta_0, \beta_1, \sigma^2, \gamma, \eta^2\right)
+    &amp;= \prod_{i=1}^{n} f\left((\text{Response})_i \mid (\text{Predictor})_i, \beta_0, \beta_1, \sigma^2\right) g\left((\text{Predictor})_i \mid \gamma, \eta^2\right) \\
+    &amp;= \left(2\pi \sigma^2\right)^{-n/2} \exp\left\{-\frac{1}{2\sigma^2}\sum_{i=1}^{n} \left((\text{Response})_i - \beta_0 - \beta_1 (\text{Predictor})_i\right)^2\right\} \\
+    &amp;\qquad \cdot \left(2\pi \eta^2\right)^{-n/2} \exp\left\{-\frac{1}{2\eta^2} \sum_{i=1}^{n}\left((\text{Predictor})_i - \gamma\right)^2\right\}.
+\end{aligned}
+\]</span></p>
+<p>While clearly a more complex model, the benefit is that we are able to simultaneously predict the value of the predictor and response for a future observation.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>While it is common to model the response conditional on the predictors and not specify the distribution of the predictors, it is possible to fully specify the likelihood of all observed variables, if desired.</p>
+</div>
+</div>
+</section>
+<section id="interpreting-the-predictors" class="level2" data-number="23.4">
+<h2 data-number="23.4" class="anchored" data-anchor-id="interpreting-the-predictors"><span class="header-section-number">23.4</span> Interpreting the Predictors</h2>
+<p>As we have already stated, the range of potential models is infinitely large; as a result, there is no one interpretation we can provide for a parameter in the model. However, it is common that the predictors in a regression model govern the mean response. For example, <a href="#eq-normal-model-multiple">Equation&nbsp;<span>23.3</span></a> considers multiple predictors, but each impacts the mean response while assuming the variance <span class="math inline">\(\sigma^2\)</span> is constant across the population. In this model, <span class="math inline">\(\beta_j\)</span> describe the relationship between the response and the <span class="math inline">\(j\)</span>-th predictor. Specifically,</p>
+<blockquote class="blockquote">
+<p><span class="math inline">\(\beta_j\)</span> is the change in the average response given a 1-unit increase in the <span class="math inline">\(j\)</span>-th predictor, <em>holding all other predictors fixed</em>.</p>
+</blockquote>
+<p>We can also provide an interpretation for the intercept <span class="math inline">\(\beta_0\)</span>:</p>
+<blockquote class="blockquote">
+<p><span class="math inline">\(\beta_0\)</span> is the average value of the response when <em>all</em> predictors take the value 0.</p>
+</blockquote>
+<p>While not governing the mean response, we should not ignore the interpretation of <span class="math inline">\(\sigma^2\)</span>:</p>
+<blockquote class="blockquote">
+<p><span class="math inline">\(\sigma^2\)</span> is the variability in the response for a <em>fixed set of predictors</em>.</p>
+</blockquote>
+<p>These interpretations seem straight forward but are hiding a lot of complexity. Working backward, notice the conditional/cross-sectional nature of the interpretation of <span class="math inline">\(\sigma^2\)</span>. It is <em>not</em> the overall variability in the response; it is the variability of the response for any fixed set of values for the predictors. That is, the model is specifying the distribution of the response for a specified level of the predictors.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Recall that a marginal distribution and a conditional distribution of a random variable are distinct distributions. The distributional model of the response in a regression setting is conditional on the values of the predictors, and the form of the marginal distribution of the response need not have the same form.</p>
+</div>
+</div>
+<p>Next, we notice that the interpretation of <span class="math inline">\(\beta_0\)</span> may not always make sense in context. For example, suppose our response is the weight of individuals (in pounds) and our predictor is their height (in inches). It does not make sense to talk about an individual with a height of 0 inches. This is the result of extrapolation.</p>
+<div id="def-extrapolation" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 23.2 (Extrapolation) </strong></span>Extrapolation occurs when we use a model to predict outside of the region for which data is available.</p>
+</div>
+<p>The danger with extrapolation is that without scientific justification, we have no reason to believe the model we have observed in one region of the support will continue to hold for all regions of the support. For example, it is possible the relationship between the mean response and the predictor is linear on the interval <span class="math inline">\((a, b)\)</span>, but it becomes quadratic outside of this interval. If we fit the model on the interval <span class="math inline">\((a, b)\)</span> and then predict outside this range, our predictions will be biased. This is what can lead to senseless interpretation of <span class="math inline">\(\beta_0\)</span>. We should always be cautious of extrapolation.</p>
+<p>Finally, and we cannot emphasize the benefit of this enough, the interpretation of <span class="math inline">\(\beta_j\)</span> measures the effect of the <span class="math inline">\(j\)</span>-th predictor <em>holding the value of other predictors in the model fixed</em>. This means that in a regression model, we are naturally isolating the effect of the predictor. This provides a unique interpretation to a hypothesis of the form</p>
+<p><span class="math display">\[H_0: \beta_j = 0 \qquad \text{vs.} \qquad H_1: \beta_j \neq 0.\]</span></p>
+<p>This hypothesis is really asking whether the <span class="math inline">\(j\)</span>-th predictor is linearly associated with the mean response <em>after accounting for the impact of the other predictors in the model</em>.</p>
+<div id="exm-therapy-likelihood" class="theorem example">
+<p><span class="theorem-title"><strong>Example 23.2 (Rehabilitation Therapy Continued) </strong></span><a href="#exm-therapy">Example&nbsp;<span>23.1</span></a> described a study to investigate recovery time among patients who have undergone a corrective knee surgery. Suppose we are willing to believe that the mean recovery time is linearly related to the age of a patient. Further, suppose that we believe that given the age of the patient, the recovery time will follow an Exponential distribution. Write down the likelihood for the observed data conditional on the age of the patient.</p>
+</div>
+<div class="solution proof">
+<p><span class="proof-title"><em>Solution</em>. </span>Recall that for an exponential distribution, the mean response is given by the scale parameter; therefore, the mean response fully characterizes the distribution. If we are willing to assume that given a patient’s age, the recovering time of one patient is unrelated to the recovery time of any other patient, then based on the description, we have</p>
+<p><span class="math display">\[(\text{Recovery Time})_i \mid (\text{Age})_i, \beta_0, \beta_1 \stackrel{\text{Ind}}{\sim}Exp\left(\beta_0 + \beta_1 (\text{Age})_i\right),\]</span></p>
+<p>where the Exponential distribution is parameterized by its scale parameter. This results in a likelihood of</p>
+<p><span id="eq-therapy-likelihood"><span class="math display">\[
+\begin{aligned}
+  f\left(\mathbf{Recovery Time} \right. &amp;\mid \left. \mathbf{Age}, \beta_0, \beta_1\right)  
+    = \prod_{i=1}^{n} \frac{1}{\beta_0 + \beta_1 (\text{Age})_i} \exp\left\{- \frac{(\text{Recovery Time})_i}{\beta_0 + \beta_1 (\text{Age})_i}\right\} \\
+    &amp;= \left[\prod_{i=1}^{n} \frac{1}{\beta_0 + \beta_1 (\text{Age})_i}\right] \exp\left\{-\sum_{i=1}^{n} \frac{(\text{Recovery Time})_i}{\beta_0 + \beta_1 (\text{Age})_i}\right\}.
+\end{aligned}
+\tag{23.6}\]</span></span></p>
+<p>The likelihood does not reduce to a simple form.</p>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Reparameterization
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Consider the proposed solution to <a href="#exm-therapy-likelihood">Example&nbsp;<span>23.2</span></a>. Recall that the scale parameter of an Exponential distribution must be positive; however, nothing in the above specification requires the linear predictor</p>
+<p><span class="math display">\[\beta_0 + \beta_1 (\text{Age})_i\]</span></p>
+<p>be positive for all ages. Often times, this is not a problem; the region of reasonable values of the parameter will result in a positive value of the scale parameter within the range of our data (again, extrapolation could be problematic). However, we might be in a case where reasonable values of the parameter lead to negative mean responses; or, it could be that the MCMC algorithm wanders into such regions creating numerical instability in the algorithm itself. Regardless, if we would like to enforce the constraint that the mean response be positive, we have two options.</p>
+<p>First, we could address the constraint by ensuring that both <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> are restricted to be positive. This could be done by choosing priors which have support on the positive real line, for example. Alternatively, we could reparameterize the model to force <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> to be positive. That is, we write</p>
+<p><span class="math display">\[(\text{Recovery Time})_i \mid (\text{Age})_i, \gamma_0, \gamma_1 \stackrel{\text{Ind}}{\sim}Exp\left(e^{\gamma_0} + e^{\gamma_1} (\text{Age})_i\right),\]</span></p>
+<p>where we have substituted <span class="math inline">\(\beta_0 = e^{\gamma_0}\)</span> and <span class="math inline">\(\beta_1 = e^{\gamma_1}\)</span>. Notice that <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span> will be positive for any value of <span class="math inline">\(\gamma_0\)</span> and <span class="math inline">\(\gamma_1\)</span>; therefore, we now have unconstrained parameters <span class="math inline">\(\gamma_0\)</span> and <span class="math inline">\(\gamma_1\)</span> and yet have constrained the mean response to be positive.</p>
+<p>There is yet a third option. We could reparameterize the mean response directly. That is, we consider</p>
+<p><span class="math display">\[(\text{Recovery Time})_i \mid (\text{Age})_i, \beta_0, \beta_1 \stackrel{\text{Ind}}{\sim}Exp\left(e^{\beta_0 + \beta_1 (\text{Age})_i}\right).\]</span></p>
+<p>In this specification, there are no constraints on <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>, but we have ensured that the mean response is positive. This has come at a cost, however; in this specification, the mean recovery time is no longer linearly related to age.</p>
+<p>Reparameterization is a helpful tool to consider to enforce constraints in a numerically stable way.</p>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./06a-regression.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Unit VI: Introduction to Regression Modeling</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./06c-reg-extensions.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Extensions to the Linear Model</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>

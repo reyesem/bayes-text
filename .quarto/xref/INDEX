@@ -1,0 +1,113 @@
+{
+  "index.qmd": {
+    "index.html": "8592efea"
+  },
+  "01a-probability.qmd": {
+    "01a-probability.html": "b7755958"
+  },
+  "01b-fundamentals.qmd": {
+    "01b-fundamentals.html": "74b6e2cb"
+  },
+  "01c-randomvariables.qmd": {
+    "01c-randomvariables.html": "f9856656"
+  },
+  "02a-language.qmd": {
+    "02a-language.html": "3d4f98da"
+  },
+  "02b-basics.qmd": {
+    "02b-basics.html": "14417d44"
+  },
+  "02c-casedeepwater.qmd": {
+    "02c-casedeepwater.html": "c5d8abc7"
+  },
+  "02d-questions.qmd": {
+    "02d-questions.html": "323412f5"
+  },
+  "02e-data.qmd": {
+    "02e-data.html": "23a1ac10"
+  },
+  "02f-summaries.qmd": {
+    "02f-summaries.html": "35c1d62d"
+  },
+  "03a-fundamentals.qmd": {
+    "03a-fundamentals.html": "c1576ed4"
+  },
+  "03b-bayesrule.qmd": {
+    "03b-bayesrule.html": "da31a51d"
+  },
+  "03c-modelingsamples.qmd": {
+    "03c-modelingsamples.html": "d4ae493c"
+  },
+  "03d-priors.qmd": {
+    "03d-priors.html": "e78fe3c6"
+  },
+  "03e-posteriors.qmd": {
+    "03e-posteriors.html": "b0893758"
+  },
+  "03f-point-estimation.qmd": {
+    "03f-point-estimation.html": "8e3ce7dc"
+  },
+  "03g-interval-estimation.qmd": {
+    "03g-interval-estimation.html": "29547633"
+  },
+  "03h-prediction.qmd": {
+    "03h-prediction.html": "7c5c03b9"
+  },
+  "03i-hypothesis-testing.qmd": {
+    "03i-hypothesis-testing.html": "056cbc62"
+  },
+  "03j-constructing-priors.qmd": {
+    "03j-constructing-priors.html": "c1fd1c3a"
+  },
+  "references.qmd": {
+    "references.html": "93a73c96"
+  },
+  "app-glossary.qmd": {
+    "app-glossary.html": "98c938f3"
+  },
+  "04a-computation.qmd": {
+    "04a-computation.html": "daaac174"
+  },
+  "04b-mc-integration.qmd": {
+    "04b-mc-integration.html": "56a64bb7"
+  },
+  "04c-mcmc.qmd": {
+    "04c-mcmc.html": "40365812"
+  },
+  "04d-mcmc-assessment.qmd": {
+    "04d-mcmc-assessment.html": "fb0eb39a"
+  },
+  "05a-comparing-groups.qmd": {
+    "05a-comparing-groups.html": "96fccbb9"
+  },
+  "05b-study-design.qmd": {
+    "05b-study-design.html": "9220c6c2"
+  },
+  "05c-independent-groups.qmd": {
+    "05c-independent-groups.html": "ca8fe3c8"
+  },
+  "05d-dependent-groups.qmd": {
+    "05d-dependent-groups.html": "a837ae46"
+  },
+  "06a-regression.qmd": {
+    "06a-regression.html": "064cddae"
+  },
+  "06b-linear-regression.qmd": {
+    "06b-linear-regression.html": "741b975f"
+  },
+  "06c-reg-extensions.qmd": {
+    "06c-reg-extensions.html": "cb9d43ff"
+  },
+  "06d-reg-priors.qmd": {
+    "06d-reg-priors.html": "f9d717d5"
+  },
+  "06e-qr-factorization.qmd": {
+    "06e-qr-factorization.html": "84f92633"
+  },
+  "06f-reg-conditions.qmd": {
+    "06f-reg-conditions.html": "ed846230"
+  },
+  "06g-categorical-reg.qmd": {
+    "06g-categorical-reg.html": "f97dc585"
+  }
+}

@@ -1,0 +1,418 @@
+```{r}
+#| include: false
+
+# Define default chunk options
+knitr::opts_chunk$set(
+  fig.path = "./images/",
+  out.width = '80%'
+)
+
+
+# Load necessary packages
+library(tidyverse)
+library(broom)
+library(broom.mixed)
+library(HDInterval)
+library(rstan)
+library(rstanarm)
+library(bayesplot)
+library(bridgesampling)
+
+
+# Additional Options
+options(knitr.kable.NA = '',
+        dplyr.show_progress = FALSE,
+        contrasts = rep("contr.treatment", 2),
+        mc.cores = (parallel::detectCores() - 2))
+
+# Graphic Options
+theme_set(theme_bw(12))
+theme_update(legend.position = "bottom",
+             legend.box = "vertical",
+             legend.direction = "horizontal")
+
+rstan_ggtheme_options(
+  legend.position = 'bottom',
+  legend.box = 'vertical',
+  legend.direction = 'horizontal',
+  panel.background = 
+    element_rect(fill = 'white', color = NA),
+  panel.border = 
+    element_rect(fill = NA, color = 'grey20'),
+  legend.key = 
+    element_rect(fill = 'white', color = NA),
+  complete = TRUE
+)
+
+# knitr::write_bib(c(.packages(), 'bookdown'), 'packages.bib')
+```
+
+
+```{r}
+#| include: false
+
+# ---- Analysis Functions
+
+# function: stan_to_df
+# description: convert stan results to a data frame
+stan_to_df <- function(object, include_warmup = FALSE){
+  if (!requireNamespace('rstan', quietly = TRUE)) {
+    stop('Package "rstan" needed for this function to work. Please install it.',
+         call. = FALSE)
+  }
+
+  params <- rstan::extract(object,
+                           permuted = FALSE,
+                           inc_warmup = TRUE)
+
+  col.names <- dimnames(params)$parameters
+
+  params <-
+    do.call(apply(params, 3, function(u){
+      tibble::tibble(
+        `_Value` = c(u),
+        `_Chain` = rep(seq_along(dimnames(u)[[2]]),
+                       each = nrow(u)),
+        `_Iteration` = rep(seq(nrow(u)),
+                           times = length(dimnames(u)[[2]])))}),
+      what = 'cbind')
+
+  params <-
+    cbind(dplyr::select(params, tidyselect::contains('_Value')),
+          paste0('chain:', params[, ncol(params) - 1]),
+          params[, ncol(params)]) |>
+    tibble::as_tibble()
+
+  colnames(params) <- c(col.names, '.chain', '.iteration')
+
+  if (!include_warmup) {
+    params <- params[params$`.iteration` > object@sim$warmup, ]
+  } else {
+    params$`.warmup` <-
+      params$`.iteration` <= object@sim$warmup
+  }
+
+  params
+}
+```
+
+
+
+```{r}
+#| include: false
+
+# ---- Support Functions
+
+# function: mykable
+# description: Create a default version of kbl().
+mykable <- function(x, ...) {
+  kableExtra::kbl(x, booktabs = TRUE, ...) |>
+    kableExtra::kable_styling(
+      bootstrap_options = c('striped', 'responsive'),
+      latex_options = c('striped'),
+      position = 'center'
+    )
+}
+
+
+# function: get_block
+# description: Extract fenced blocks from a QMD document matching some pattern.
+repeat_block <- function(x, pattern) {
+  # find start lines
+  startind <- x |>
+    str_detect(pattern = pattern) |>
+    which()
+  
+  # find all fenced blocks
+  allind <- x |>
+    str_detect(fixed(':::')) |>
+    which()
+  
+  # find end of each block
+  endind <- allind[(is.element(allind, startind) |> which()) + 1]
+  
+  map2(startind, endind, ~ x[.x:.y])
+}
+
+
+# function: trim_vector
+# description: Remove empty elements from beginning and end of a vector.
+trim_vector <- function(x, side = c('both', 'left', 'right')) {
+  if ((side == 'left') || (side == 'both')) {
+    x <- x[c((which(str_detect(x, '[[:graph:]]'))[1]):(length(x)))]
+  }
+  
+  if ((side == 'right') || (side == 'both')) {
+    x <- x[c(1L:(rev(which(str_detect(x, '[[:graph:]]')))[1]))]
+  }
+  
+  return(x)
+}
+
+
+
+# function: get_terms
+# description: Given a list of fenced blocks, extract terms.
+get_terms <- function(x, term = c('reference', 'title', 'text', 'fullblock')) {
+  if (term == 'reference') {
+    map_chr(x, ~ .x |>
+              str_subset(pattern = ':::\\{#') |>
+              str_remove_all(pattern = '(:::\\{#)|(\\})'))
+  } else if (term == 'title') {
+    map_chr(x, ~ .x |> 
+              str_subset(pattern = '##') |> 
+              str_remove(pattern = '##') |>
+              str_trim())
+  } else if (term == 'text') {
+    map_chr(x, ~ .x |>
+            str_subset(pattern = '(:::)|(##)', negate = TRUE) |>
+            trim_vector(side = 'both') |>
+            str_c(collapse = '\n'))
+    
+    
+  } else if (term == 'fullblock') {
+    map_chr(x, ~ .x |>
+              str_subset(pattern = ':::', negate = TRUE) |>
+              str_c(collapse = '\n'))
+  }
+}
+
+
+# ---- fct-if_exceeds_threshold ----
+# Description: If x > a, return x. Otherwise, return a.
+#
+# Parameters:
+#   x          Numeric. Value of interest.
+#   a          Numeric. Threshhold (default = 0).
+if_exceeds_threshold <- function(x, a = 0){
+  ifelse(x >= a, x, a)
+}
+
+
+
+
+# ---- fct-display_est ----
+# Description: Given model output, display the estimate for a particular
+#              variable in text, rounding appropriately.
+#
+# Parameters:
+#   value      Numeric. Value to be printed.
+#   digits     Scalar. The number of digits to format the value to. This is
+#                used to determine the precision with which the value is 
+#                formatted. (default = 2)
+#
+# Details:
+#   The values in value are first rounded to the appropriate number of
+#   digits. If that results in 0, then the values are placed in scientific 
+#   notation with digits representing the number of significant figures. So,
+#   with digits = 2, 0.00123 becomes 1.2e-03, 0.0091 becomes 0.01, and 0.012
+#   becomes 0.01.
+#
+#   If a value is at least 10, we decrease the number of decimal places by each
+#   power of 10 the value increases.  So, with digits = 2, 1.234 becomes 1.23,
+#   12.34 becomes 12.3 and 123.456 becomes 123.
+display_est <- function(value, digits = 2){
+  roundingDigits <- 
+    if_exceeds_threshold(
+      digits - if_exceeds_threshold(floor(log10(abs(value)))))
+  
+  ifelse(round(value, digits) == 0L,
+         format(value, digits = digits, scientific = TRUE),
+         round(value, roundingDigits) %>% as.character())
+}
+
+
+
+# ---- fct-display_CI ----
+# Description: Given lower and upper bounds, format a confidence interval for
+#              display in text or tables.
+#
+# Parameters:
+#   lower      Numeric. Lower bound of CI.
+#   upper      Numeric. Upper bound of CI.
+#   digits     Scalar. The number of digits to format the value to. This is
+#                used to determine the precision with which the value is 
+#                formatted. (default = 2)
+#   trans      A function which applies a transformation to the estimate
+#                (default = no transformation).
+#
+# Details:
+#   The values in lower and upper are first rounded to the appropriate number of
+#   digits. If that results in 0, then the values are placed in scientific 
+#   notation with digits representing the number of significant figures. So,
+#   with digits = 2, 0.00123 becomes 1.2e-03, 0.0091 becomes 0.01, and 0.012
+#   becomes 0.01.
+#
+#   If a value is at least 10, we decrease the number of decimal places by each
+#   power of 10 the value increases.  So, with digits = 2, 1.234 becomes 1.23,
+#   12.34 becomes 12.3 and 123.456 becomes 123.
+display_CI <- function(lower, upper, digits = 2,
+                       trans = function(u) u){
+  if (digits < 0){
+    rlang::abort("digits must be nonnegative.")
+  }
+  
+  if (trans(lower) > trans(upper)){
+    tu <- upper
+    tl <- lower
+    
+    lower <- trans(tu)
+    upper <- trans(tl)
+  } else {
+    lower <- trans(lower)
+    upper <- trans(upper)
+  }
+  
+  lowerRoundingDigits <- 
+    if_exceeds_threshold(
+      digits - if_exceeds_threshold(floor(log10(abs(lower)))))
+  
+  upperRoundingDigits <-
+    if_exceeds_threshold(
+      digits - if_exceeds_threshold(floor(log10(abs(upper)))))
+  
+  
+  lower <- ifelse(round(lower, digits) == 0L,
+                  format(lower, digits = digits, scientific = TRUE),
+                  round(lower, lowerRoundingDigits) %>% as.character())
+  
+  upper <- ifelse(round(upper, digits) == 0L,
+                  format(upper, digits = digits, scientific = TRUE),
+                  round(upper, upperRoundingDigits) %>% as.character())
+  
+  
+  # print
+  paste0("[", lower, ", ", upper, "]")
+}
+
+
+
+
+# ---- fct-model_display_CI ----
+# Description: Given model output, display the p-value for a particular
+#              variable in text using the display_CI function.
+#
+# Parameters:
+#   model      The model output used to obtain the p-value (should be the
+#                output of a broom::tidy() call).
+#   term       The string representation of the term to use.
+#   digits     See display_CI()
+#   trans      A function which applies a transformation to the estimate
+#                (default = no transformation).
+model_display_CI <- function(model, selectedTerm, digits = 2, 
+                             trans = function(u) u){
+  model %>% 
+    filter(term == selectedTerm) %>% 
+    mutate(CI = map2_chr(conf.low, conf.high, display_CI, digits = digits,
+                         trans = trans)) %>%
+    pull(CI)
+}
+
+
+
+
+# ---- fct-model_display_est ----
+# Description: Given model output, display the estimate for a particular
+#              variable in text, rounding appropriately.
+#
+# Parameters:
+#   model      The model output used to obtain the p-value (should be the
+#                output of a broom::tidy() call).
+#   term       The string representation of the term to use.
+#   digits     See display_CI()
+#   trans      A function which applies a transformation to the estimate
+#                (default = no transformation).
+model_display_est <- function(model, selectedTerm, digits = 2,
+                              trans = function(u) u){
+  estimate <- model %>%
+    filter(term == selectedTerm) %>%
+    pull(estimate) %>%
+    trans()
+  
+  display_est(estimate)
+}
+
+
+# ---- fct-my_scale ----
+# Description: Given a numeric vector of values, rescales the variables to 
+#              exist on the interval (low, high).
+my_scale <- function(u, low = 0, high = 1){
+  minmax <- range(u)
+  u <- (u - minmax[1]) / diff(minmax)
+  
+  (u * (high - low)) + low
+}
+```
+
+
+```{r}
+#| include: false
+
+# ---- Case Study Data: Deepwater Horizon
+deepwater.df <- tibble(
+  Volunteer_Location = 
+    factor(rep(c("Wildlife Cleanup", "No Oil Exposure"), each = 2),
+           levels = c("Wildlife Cleanup", "No Oil Exposure"),
+           ordered = TRUE),
+  Respiratory_Symptoms = 
+    factor(rep(c("Yes", "No"), times = 2),
+           levels = c("No", "Yes"),
+           ordered = TRUE),
+  Frequency = c(15, 54-15, 16, 103-16),
+  Rel_Frequency = c(15/54, (54-15)/54, 16/103, (103-16)/103)
+)
+```
+
+```{r}
+#| include: false
+
+# ---- Example Data: Pulp Fiber
+paper.df <- read_csv("./data/pulpfiber.csv",
+  col_names = c("Specimen",
+                "Arithmetic_Fiber_Length",
+                "Long_Fiber_Fraction",
+                "Fine_Fiber_Fraction",
+                "Zero_Span_Tensile",
+                "Breaking_Length",
+                "Elastic_Modulus",
+                "Stress_at_Failure",
+                "Burst_Strength"),
+  col_types = "innnnnnnn",
+  skip = 1
+)
+```
+
+```{r}
+#| include: false
+
+# ---- Example Data: C-sections
+csecdf <- tibble(
+  Deliveries = c(3, 1, 0, 0, 0, 2, 5, 6, 9, 0, 5, 1, 0, 1, 0)
+)
+```
+
+```{r}
+#| include: false
+
+# ---- Example Data: Therapy
+therapy.df <- read_csv("./data/therapy.csv",
+                       col_names = c("Subject",
+                                     "Activity",
+                                     "Recovery",
+                                     "Age"),
+                       col_types = "icnn",
+                       skip = 1)
+```
+
+
+\providecommand{\norm}[1]{\lVert#1\rVert}
+\providecommand{\abs}[1]{\lvert#1\rvert}
+\providecommand{\iid}{\stackrel{\text{IID}}{\sim}}
+\providecommand{\ind}{\stackrel{\text{Ind}}{\sim}}
+  
+\providecommand{\bm}[1]{\mathbf{#1}}
+\providecommand{\bs}[1]{\boldsymbol{#1}}
+\providecommand{\bbeta}{\bs{\beta}}
+  
+\providecommand{\Ell}{\mathcal{L}}
+\providecommand{\indep}{\perp\negthickspace\negmedspace\perp}

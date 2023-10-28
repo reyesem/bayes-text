@@ -1,0 +1,38 @@
+# QR Factorization {#sec-qr-factorization}
+
+{{< include _setupcode.qmd >}}
+
+As a regression model grows in complexity, we need to consider the computational efficiency of the algorithms used to fit the model.  QR factorization is a well-known computational step that can increase the efficiency of an MCMC algorithm in a regression model.
+
+Consider a regression model in which the parameter $\theta$ is allowed to vary according to a linear function of the predictors:
+
+$$\theta_i = \sum_{j=1}^{p} \beta_j (\text{Predictor } j)_i.$$
+
+We have eliminated the "intercept" term $\beta_0$, but this is done without loss of generality as we could view "Predictor 1" as the value 1 for all subjects, resulting in $\beta_1$ acting as the intercept.  We can represent this model in matrix notation as
+
+$$\bs{\theta} = \bm{X} \bs{\beta},$$
+
+where $\bs{\beta} = \left(\beta_1, \dotsc, \beta_p\right)^\top$ is the parameter vector; and, the $j$-th column of $\bm{X}$ is the vector of length $n$ containing the values of the $j$-th predictor for the $n$ subjects.  That is,
+
+$$\bm{X}_{i, j} = (\text{Predictor } j)_i \qquad j=1,2,\dots,p.$$
+
+The matrix $\bm{X}$ is known as the design matrix.
+
+As long as the number of observations $n$ exceeds the number of predictors $p$ in the model, we can decompose the design matrix $\bm{X}$ as
+
+$$\bm{X} = \bm{Q}\bm{R}$$
+
+where $\bm{Q}$ is an orthogonal $n \times p$ matrix and $\bm{R}$ is an upper-triangular $p \times p$ matrix.  Then, we can write the linear predictor for the mean response as
+
+$$\bm{X}\bs{\beta} = \bm{Q}\bm{R}\bs{\beta}.$$
+
+Therefore, the regression is conducted with the "new" design matrix $\bm{Q}$ with parameters $\bs{\eta} = \bm{R}\bs{\beta}$.  These parameters are then transformed back into the parameters of interest $\bs{\beta}$ by acknowledging that
+
+$$\bs{\beta} = \bm{R}^{-1} \bs{\eta}.$$
+
+Admittedly, this feels like only algebraic manipulation.  The reason this works is that the columns of the "new" design matrix $\bm{Q}$ are orthogonal.  This allows the MCMC algorithm to move more easily through the parameter space because changing one column has no effect on the other columns in the optimization routine.  The columns of this new design matrix are also on the same scale; that is, the impact of one variable (like yearly income) taking on extreme values while another (like an indicator variable) taking on smaller units is reduced.  Having variables on the same scale allows the MCMC algorithm to move around the parameter space with a small number of large steps.  As a result, the numerical accuracy of the algorithm is improved.  
+
+:::{.callout-tip}
+## Big Idea
+QR factorization improves the computational efficiency of the regression and MCMC algorithms.  There is no change to the actual distribution of the parameters.
+:::
