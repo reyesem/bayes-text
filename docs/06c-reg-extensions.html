@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Bayesian Data Analysis - 24&nbsp; Extensions to the Linear Model</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./06d-reg-priors.html" rel="next">
+<link href="./06b-linear-regression.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="mystyles.css">
+</head>
+
+<body class="nav-sidebar docked">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./06a-regression.html">Unit VI: Introduction to Regression Modeling</a></li><li class="breadcrumb-item"><a href="./06c-reg-extensions.html"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Extensions to the Linear Model</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Bayesian Data Analysis</a> 
+        <div class="sidebar-tools-main">
+    <a href="./ma483-text.pdf" rel="" title="Download PDF" class="quarto-navigation-tool px-1" aria-label="Download PDF"><i class="bi bi-file-pdf"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./01a-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit I: Essential Probability</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01b-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Essential Probability</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01c-randomvariables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Random Variables and Distributions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./02a-language.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit II: Language of Data</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02b-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">The Statistical Process</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02c-casedeepwater.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Case Study: Health Effects of the Deepwater Horizon Oil Spill</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02d-questions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Asking the Right Questions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02e-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Gathering the Evidence (Data Collection)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02f-summaries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Presenting the Evidence (Summarizing Data)</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./03a-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit III: Fundamentals of Bayesian Inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03b-bayesrule.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bayes Rule</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03c-modelingsamples.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Modeling Samples</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03d-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Quantifying/Modeling Prior Information</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03e-posteriors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Updating Prior Beliefs (Posterior Distributions)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03f-point-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Point Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03g-interval-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Interval Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03h-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Prediction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03i-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03j-constructing-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Constructing Prior Distributions</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./04a-computation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit IV: Numerical Approaches to Bayesian Computations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04b-mc-integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Monte Carlo Integration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04c-mcmc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Markov Chain Monte Carlo (MCMC)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04d-mcmc-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Assessing MCMC Samples</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./05a-comparing-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit V: Hierarchical Models for Comparing Groups</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05b-study-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Elements of Good Study Design</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05c-independent-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Considerations when Comparing Independent Groups</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05d-dependent-groups.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Considerations when Comparing Related Groups</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./06a-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unit VI: Introduction to Regression Modeling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06b-linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Regression Models for a Quantitative Response</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06c-reg-extensions.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Extensions to the Linear Model</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06d-reg-priors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Default Priors in Regression Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06e-qr-factorization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">QR Factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06f-reg-conditions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Assessment for Regression Models for the Mean</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06g-categorical-reg.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Regression Models for Categorical Responses</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./app-glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#including-categorical-predictors" id="toc-including-categorical-predictors" class="nav-link active" data-scroll-target="#including-categorical-predictors"><span class="header-section-number">24.1</span> Including Categorical Predictors</a></li>
+  <li><a href="#curvature" id="toc-curvature" class="nav-link" data-scroll-target="#curvature"><span class="header-section-number">24.2</span> Curvature</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-reg-extensions" class="quarto-section-identifier"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Extensions to the Linear Model</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p>It is difficult to develop a general theory of regression models since each model can be uniquely constructed, allowing the predictors to impact the mean response, the variability of the response, or both through a shape parameter, for example. However, regardless of the regression model being considered, there are some common modeling techniques that can be helpful.</p>
+<p>Let <span class="math inline">\(\theta = g\left(\boldsymbol{\beta}, \mathbf{Predictors}\right)\)</span> be some parameter characterizing the distribution of the response conditional on some predictors. For example, <span class="math inline">\(\theta\)</span> might represent the mean response given the predictors. The previous chapter introduced the idea of <span class="math inline">\(g(\cdot)\)</span> being a linear function of the parameter vector <span class="math inline">\(\boldsymbol{\beta}\)</span>; that is, the predictors impact <span class="math inline">\(\theta\)</span> through a linear function like</p>
+<p><span id="eq-linear-operator"><span class="math display">\[\theta_i = \beta_0 + sum_{j=1}^{p} \beta_j (\text{Predictor } j)_i. \tag{24.1}\]</span></span></p>
+<p>It turns out that while it may not be immediately obvious, this modeling structure is quite flexible. In this chapter, we consider some common extensions that can be framed in terms of this linear structure.</p>
+<section id="including-categorical-predictors" class="level2" data-number="24.1">
+<h2 data-number="24.1" class="anchored" data-anchor-id="including-categorical-predictors"><span class="header-section-number">24.1</span> Including Categorical Predictors</h2>
+<p>When our collection of predictors only consists of quantitative variables, applying <a href="#eq-linear-operator">Equation&nbsp;<span>24.1</span></a> is straightforward. However, when one of the predictors is a categorical variable (for example, the prior activity level of a patient in <a href="06b-linear-regression.html#exm-therapy">Example&nbsp;<span>23.1</span></a>), it may not be obvious how to incorporate these into <a href="#eq-linear-operator">Equation&nbsp;<span>24.1</span></a>. This is actually related to the models we considered in <a href="05c-independent-groups.html"><span>Chapter&nbsp;21</span></a>; we revisit the idea from a regression perspective.</p>
+<div id="exm-anxiety" class="theorem example">
+<p><span class="theorem-title"><strong>Example 24.1 (Anxiety Among College Students) </strong></span>Suppose we conduct a small survey to determine whether the distribution of the anxiety level of college students differs depending on their class standing (freshman, sophomore, junior, senior). Let <span class="math inline">\(\theta_i\)</span> represent the parameter of interest governing the distribution of anxiety for the <span class="math inline">\(i\)</span>-th student. We want to let <span class="math inline">\(\theta_i\)</span> depend on class standing within the form illustrated in <a href="#eq-linear-operator">Equation&nbsp;<span>24.1</span></a>.</p>
+</div>
+<p>We approached this problem in <a href="05c-independent-groups.html"><span>Chapter&nbsp;21</span></a> essentially by saying</p>
+<p><span class="math display">\[(\text{Anxiety})_i \mid \boldsymbol{\theta} \stackrel{\text{Ind}}{\sim}f\left((\text{Anxiety})_i \mid \theta_j\right),\]</span></p>
+<p>where <span class="math inline">\(\theta_1\)</span> is the parameter for freshman students, <span class="math inline">\(\theta_2\)</span> the parameter for sophomores, <span class="math inline">\(\theta_3\)</span> the parameter for juniors, and <span class="math inline">\(\theta_4\)</span> the parameter for seniors. Illustrating the impact of class standing on the distribution of anxiety, we might define a new variable</p>
+<p><span class="math display">\[(\text{Class})_i = \begin{cases}
+1 &amp; \text{if i-th student is a freshman} \\
+2 &amp; \text{if i-th student is a sophomore} \\
+3 &amp; \text{if i-th student is a junior} \\
+4 &amp; \text{if i-th student is a senior} \end{cases}\]</span></p>
+<p>and then proceeded to say</p>
+<p><span id="eq-indicator-orig"><span class="math display">\[(\text{Anxiety})_i \mid (\text{Class})_i, \boldsymbol{\theta} \stackrel{\text{Ind}}{\sim}f\left((\text{Anxiety})_i \mid \theta_{(\text{Class})_i}\right). \tag{24.2}\]</span></span></p>
+<p>Again, this was essentially our approach in <a href="05c-independent-groups.html"><span>Chapter&nbsp;21</span></a>, and it illustrates that we can allow the parameter to depend upon the predictor (we are doing regression). It just feels disjoint from the approach we have taken in <a href="06b-linear-regression.html"><span>Chapter&nbsp;23</span></a>. At first glance, we might be tempted to say</p>
+<p><span id="eq-indicator-linear"><span class="math display">\[
+\begin{aligned}
+(\text{Anxiety})_i \mid (\text{Class})_i, \theta_i
+  &amp;\stackrel{\text{Ind}}{\sim}f\left((\text{Anxiety})_i \mid \theta_i\right) \\
+\theta_i
+  &amp;= \beta_0 + \beta_1 (\text{Class})_i
+\end{aligned}
+\tag{24.3}\]</span></span></p>
+<p>making use of the numeric variable <span class="math inline">\((\text{Class})_i\)</span> we defined above. However, this imposes additional structure on the model. In particular, it suggests that the parameter <span class="math inline">\(\theta\)</span> changes <em>linearly</em> as we move between class standing (freshman to sophomore, junior to senior). Notice that the additional structure is captured by a reduced number of parameters. The original model in <a href="#eq-indicator-orig">Equation&nbsp;<span>24.2</span></a> had four parameters: <span class="math inline">\(\theta_1, \theta_2, \theta_3\)</span> and <span class="math inline">\(\theta_4\)</span>. The approach in <a href="#eq-indicator-linear">Equation&nbsp;<span>24.3</span></a>, however, only has two parameters: <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>. These two models are clearly <em>not</em> equivalent. However, that does not mean that we cannot embed categorical predictors into the linear framework of <a href="#eq-linear-operator">Equation&nbsp;<span>24.1</span></a>; we just need a different approach, and that approach involves indicator variables.</p>
+<div id="def-indicator-variable" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 24.1 (Indicator Variable) </strong></span>An indicator variable is a binary variable (takes on the value 0 or 1), taking the value 1 when a specific event occurs. A collection of <span class="math inline">\(k-1\)</span> indicator variables can be used to capture a categorical variable with <span class="math inline">\(k\)</span> levels in a regression model.</p>
+<ul>
+<li>The “reference group” (or reference level) is the group (level) defined by setting all indicator variables in a regression model to 0.</li>
+</ul>
+</div>
+<p>For the Anxiety example, we define <span class="math inline">\(4 - 1 = 3\)</span> indicator variables to capture class status:</p>
+<p><span class="math display">\[
+\begin{aligned}
+  (\text{Sophomore})_i &amp;= \begin{cases}
+    1 &amp; \text{if i-th student is a Sophomore} \\
+    0 &amp; \text{otherwise} \end{cases} \\
+  (\text{Junior})_i &amp;= \begin{cases}
+    1 &amp; \text{if i-th student is a Junior} \\
+    0 &amp; \text{otherwise} \end{cases} \\
+  (\text{Senior})_i &amp;= \begin{cases}
+    1 &amp; \text{if i-th student is a Senior} \\
+    0 &amp; \text{otherwise.} \end{cases} \\
+\end{aligned}
+\]</span></p>
+<p>We can then place these into the model following the format of <a href="#eq-linear-operator">Equation&nbsp;<span>24.1</span></a>; specifically, we have</p>
+<p><span id="eq-indicator"><span class="math display">\[
+\begin{aligned}
+(\text{Anxiety})_i \mid \theta_i
+  &amp;\stackrel{\text{Ind}}{\sim}f\left((\text{Anxiety})_i \mid \theta_i\right) \\
+\theta_i
+  &amp;= \beta_0 + \beta_1 (\text{Sophomore})_i + \beta_2 (\text{Junior})_i + \beta_3 (\text{Senior})_i.
+\end{aligned}
+\tag{24.4}\]</span></span></p>
+<p>It may at first seem that this model neglects the freshman class; however, the freshman class serves as the reference group (not sophomores or juniors or seniors) so the parameter for these students is represented by <span class="math inline">\(\beta_0\)</span>. Comparing the modeling strategy in <a href="#eq-indicator">Equation&nbsp;<span>24.4</span></a> to that in <a href="#eq-indicator-orig">Equation&nbsp;<span>24.2</span></a>, we note that</p>
+<p><span class="math display">\[
+\begin{aligned}
+\theta_1 &amp;= \beta_0 \\
+\theta_2 &amp;= \beta_0 + \beta_1 \\
+\theta_3 &amp;= \beta_0 + \beta_2 \\
+\theta_4 &amp;= \beta_0 + \beta_3.
+\end{aligned}
+\]</span></p>
+<p>Our revised model incorporates the categorical predictor while maintaining the general structure/complexity (we have not reduced the number of parameters).</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Big Idea
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A model which is linear in the parameters can accommodate categorical predictors through the inclusion of indicator variables.</p>
+</div>
+</div>
+<div id="exm-therapy-likelihood-full" class="theorem example">
+<p><span class="theorem-title"><strong>Example 24.2 (Rehabilitation Therapy Continued) </strong></span><a href="06b-linear-regression.html#exm-therapy">Example&nbsp;<span>23.1</span></a> described a study to investigate recovery time among patients who have undergone a corrective knee surgery. Suppose we are willing to believe that the mean recovery time is linearly related to the age of a patient, but we also believe that the mean recovery time may differ depending on the patient’s level of activity prior to the surgery.</p>
+<p>Further, suppose that we believe that given the age of the patient and their prior activity level, the recovery time will follow an Exponential distribution. Write down the likelihood for the observed data conditional on the age of the patient and their prior activity level.</p>
+</div>
+<div class="solution proof">
+<p><span class="proof-title"><em>Solution</em>. </span>Generalizing our solution in <a href="06b-linear-regression.html#exm-therapy-likelihood">Example&nbsp;<span>23.2</span></a>, we can say that</p>
+<p><span class="math display">\[(\text{Recovery Time})_i \mid (\mathbf{Predictors})_i, \boldsymbol{\beta} \stackrel{\text{Ind}}{\sim}Exp\left(\theta_i\right)\]</span></p>
+<p>where <span class="math inline">\(\theta_i\)</span>, the scale term, will depend on the age and prior activity level of the patient, giving a likelihood of</p>
+<p><span class="math display">\[
+\begin{aligned}
+f\left(\mathbf{Recovery Time} \right. &amp;\mid \left. \mathbf{Predictors}, \boldsymbol{\beta}\right)
+    = \prod_{i=1}^{n} \frac{1}{\theta_i} \exp\left\{- \frac{(\text{Recovery Time})_i}{\theta_i}\right\} \\
+    &amp;= \left[\prod_{i=1}^{n} \frac{1}{\theta_i}\right] \exp\left\{-\sum_{i=1}^{n} \frac{(\text{Recovery Time})_i}{\theta_i}\right\}.
+\end{aligned}
+\]</span></p>
+<p>It just remains to define the relationship between the predictors and the scale parameter <span class="math inline">\(\theta_i\)</span>. If we adopt the linear structure of <a href="#eq-linear-operator">Equation&nbsp;<span>24.1</span></a>, we have</p>
+<p><span class="math display">\[\theta_i = \beta_0 + \beta_1 (\text{Age})_i + \beta_2 (\text{Moderate})_i + \beta_3 (\text{High})_i,\]</span></p>
+<p>where</p>
+<p><span class="math display">\[
+\begin{aligned}
+  (\text{Moderate})_i
+    &amp;= \begin{cases} 1 &amp; \text{if i-th patient has a moderate amount of activity prior to surgery} \\ 0 &amp; \text{otherwise} \end{cases} \\
+  (\text{High})_i
+    &amp;= \begin{cases} 1 &amp; \text{if i-th patient has a high amount of activity prior to surgery} \\ 0 &amp; \text{otherwise}, \end{cases}
+\end{aligned}
+\]</span></p>
+<p>leaving the “low activity” group as the reference group.</p>
+</div>
+</section>
+<section id="curvature" class="level2" data-number="24.2">
+<h2 data-number="24.2" class="anchored" data-anchor-id="curvature"><span class="header-section-number">24.2</span> Curvature</h2>
+<p><a href="#eq-linear-operator">Equation&nbsp;<span>24.1</span></a> is typically referred to as a “linear model.” So, it may seem at first glance that such a model restricts us to only consider cases in which the predictor linearly impacts the parameter of interest (the mean response being linearly related to the predictor, for example). However, <a href="#eq-linear-operator">Equation&nbsp;<span>24.1</span></a> is linear <em>in the parameters</em>; and therefore, it is flexible enough to capture curvature.</p>
+<p>While there are more sophisticated approaches, to simply illustrate the idea, we can incorporate curvature through higher-order terms. For example, the following model fits nicely within the linear framework of <a href="#eq-linear-operator">Equation&nbsp;<span>24.1</span></a>:</p>
+<p><span class="math display">\[\theta_i = \beta_0 + \beta_1 (\text{Predictor 1})_i + \beta_2 (\text{Predictor 1})_i^2.\]</span></p>
+<p>This is linear in the parameters, even though it is not linear in the predictor. Essentially, we can simply define</p>
+<p><span class="math display">\[(\text{Predictor 2})_i = (\text{Predictor 1})_i^2\]</span></p>
+<p>and then it aligns directly with <a href="#eq-linear-operator">Equation&nbsp;<span>24.1</span></a>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We need not restrict ourselves to polynomial terms. For example, it is possible to use cubic splines in regression models, and it has even been shown that carefully chosen splines can approximate nearly any form of curvature.</p>
+</div>
+</div>
+<p>Of course, we are not restricted to only considering functions which are linear in the parameters; they tend to be commonly used for their simplicity of interpretation when scientific models do not suggest a particular form for the model. However, we could consider models like</p>
+<p><span class="math display">\[\theta_i = \beta_0 e^{\beta_1 (\text{Predictor})_i},\]</span></p>
+<p>which are not linear in the parameters. These are also valid models and easy to make inference on in the Bayesian framework.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./06b-linear-regression.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Regression Models for a Quantitative Response</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./06d-reg-priors.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Default Priors in Regression Models</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
