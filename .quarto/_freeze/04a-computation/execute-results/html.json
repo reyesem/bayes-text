@@ -1,0 +1,14 @@
+{
+  "hash": "91796cb8d8e223c70c32f6b4b32d8c64",
+  "result": {
+    "markdown": "# Unit IV: Numerical Approaches to Bayesian Computations {-}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\\providecommand{\\norm}[1]{\\lVert#1\\rVert}\n\\providecommand{\\abs}[1]{\\lvert#1\\rvert}\n\\providecommand{\\iid}{\\stackrel{\\text{IID}}{\\sim}}\n\\providecommand{\\ind}{\\stackrel{\\text{Ind}}{\\sim}}\n  \n\\providecommand{\\bm}[1]{\\mathbf{#1}}\n\\providecommand{\\bs}[1]{\\boldsymbol{#1}}\n\\providecommand{\\bbeta}{\\bs{\\beta}}\n  \n\\providecommand{\\Ell}{\\mathcal{L}}\n\\providecommand{\\indep}{\\perp\\negthickspace\\negmedspace\\perp}\n\n\n\nThe previous unit discussed the fundamental components of the Bayesian paradigm.  We began by specifying the likelihood, a model describing the data generating process as a function of unknown parameters, and a prior distribution, which captures our beliefs about the unknown parameters prior to observing data.  Using Bayes Theorem, we were able to characterize our beliefs about the unknown parameter after observing the data in the posterior distribution.  We know that the posterior distribution is proportional to the product of the likelihood and the prior; that is,\n\n$$\\pi(\\bs{\\theta} \\mid \\bm{x}) \\propto f(\\bm{x} \\mid \\bs{\\theta}) \\pi(\\bs{\\theta}).$$\n\nHowever, to determine the exact form of the posterior distribution, we need to determine the scaling constant given by\n\n$$\\frac{1}{\\int f(\\bm{x} \\mid \\bs{\\theta}) \\pi(\\bs{\\theta}) d\\bs{\\theta}}.$$\n\nUnfortunately, this integral can be intractable, especially as the dimension of $\\bs{\\theta}$ grows.  In this unit, we consider numerical approaches for common Bayesian quantities, such as point and interval estimation.  With these techniques, we can address more intricate problems.\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

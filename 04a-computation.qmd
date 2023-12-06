@@ -1,5 +1,7 @@
 # Unit IV: Numerical Approaches to Bayesian Computations {-}
 
+{{< include _setupcode.qmd >}}
+
 The previous unit discussed the fundamental components of the Bayesian paradigm.  We began by specifying the likelihood, a model describing the data generating process as a function of unknown parameters, and a prior distribution, which captures our beliefs about the unknown parameters prior to observing data.  Using Bayes Theorem, we were able to characterize our beliefs about the unknown parameter after observing the data in the posterior distribution.  We know that the posterior distribution is proportional to the product of the likelihood and the prior; that is,
 
 $$\pi(\bs{\theta} \mid \bm{x}) \propto f(\bm{x} \mid \bs{\theta}) \pi(\bs{\theta}).$$
